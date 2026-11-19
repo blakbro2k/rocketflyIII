@@ -3,9 +3,10 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Budgets and accounts · RocketFlyIII</title>
+  <title>Overview · RocketFlyIII</title>
   <link rel="stylesheet" href="accounts.css">
   <script src="budgets.js" defer></script>
+  <script src="subscriptions.js" defer></script>
   <script src="accounts.js" defer></script>
 </head>
 <body>
@@ -36,6 +37,17 @@
         <tbody></tbody>
       </table>
       </template>
+    </section>
+    <section class="panel" aria-labelledby="subscription-heading">
+      <div class="heading">
+        <h2 id="subscription-heading">Subscriptions</h2>
+        <button type="button" id="subscription-refresh" aria-label="Refresh subscriptions">Refresh</button>
+      </div>
+      <p id="subscription-status" role="status">Loading subscriptions from Firefly III…</p>
+      <table id="subscription-table" aria-label="Firefly III subscriptions" hidden>
+        <thead><tr><th scope="col">Subscription name</th><th scope="col">Status</th></tr></thead>
+        <tbody></tbody>
+      </table>
     </section>
   </main>
 </body>
