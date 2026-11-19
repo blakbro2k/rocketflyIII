@@ -49,7 +49,7 @@ class AccountControllerTest {
     private ResponseCreator page(int number, int pages, String data) {
         return withSuccess(
                 """
-                {"data":%s,"meta":{"pagination":{"current_page":%d,"total_pages":%d}}}
+                {"data":%s,"meta":{"pagination":{"total":2,"count":1,"per_page":1,"current_page":%d,"total_pages":%d}}}
                 """
                         .formatted(data, number, pages),
                 MediaType.APPLICATION_JSON);
