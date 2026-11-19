@@ -1,7 +1,7 @@
 package com.asg.rocketflyiii.firefly.api;
 
 import com.asg.rocketflyiii.config.FireflyProperties;
-import com.asg.rocketflyiii.firefly.dto.FireflyAccountResponse;
+import com.asg.rocketflyiii.firefly.dto.FireflyPage;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.ResourceAccessException;
@@ -71,33 +71,42 @@ public class FireflyClient {
      * @param page the page number, starting at 1
      * @return the typed account response, including pagination metadata
      */
-    public FireflyAccountResponse getAccountsPage(int page) {
+    public FireflyPage getAccountsPage(int page) {
         String json = getAccounts(page);
 
-        return new ObjectMapper().readValue(json, FireflyAccountResponse.class);
+        return new ObjectMapper().readValue(json, FireflyPage.class);
     }
 
-    public FireflyAccountResponse getAssetAccountsPage(int page) {
+    public FireflyPage getAssetAccountsPage(int page) {
         return getAccountsPage("asset", page);
     }
 
-    public FireflyAccountResponse getAccountsPage(String type, int page) {
+    public FireflyPage getAccountsPage(String type, int page) {
+        return getPage(FireflyEndpoints.ACCOUNTS, type, page);
+    }
+
+    public FireflyPage getBudgetsPage(int page) {
+        return getPage(FireflyEndpoints.BUDGETS, null, page);
+    }
+
+    private FireflyPage getPage(String endpoint, String type, int page) {
         try {
-            FireflyAccountResponse response =
+            FireflyPage response =
                     restClient
                             .get()
                             .uri(
                                     builder -> {
-                                        var uri =
-                                                builder.path(FireflyEndpoints.ACCOUNTS)
-                                                        .queryParam("type", type);
+                                        var uri = builder.path(endpoint);
+                                        if (type != null) {
+                                            uri.queryParam("type", type);
+                                        }
                                         if (page > 1) {
                                             uri.queryParam("page", page);
                                         }
                                         return uri.build();
                                     })
                             .retrieve()
-                            .body(FireflyAccountResponse.class);
+                            .body(FireflyPage.class);
             if (response == null
                     || response.data() == null
                     || response.meta() == null

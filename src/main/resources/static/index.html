@@ -3,25 +3,40 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Accounts · RocketFlyIII</title>
+  <title>Budgets and accounts · RocketFlyIII</title>
   <link rel="stylesheet" href="accounts.css">
+  <script src="budgets.js" defer></script>
   <script src="accounts.js" defer></script>
 </head>
 <body>
   <header><span class="mark" aria-hidden="true">↗</span> RocketFlyIII</header>
   <main>
-    <div class="heading">
-      <h1>Accounts</h1>
-      <button id="refresh" type="button">Refresh</button>
-    </div>
-    <p id="status" role="status">Loading accounts from Firefly III…</p>
-    <div id="groups"></div>
-    <template id="account-table">
-    <table>
-      <thead><tr><th scope="col">Account name</th><th scope="col">Current balance</th></tr></thead>
-      <tbody></tbody>
-    </table>
-    </template>
+    <section class="panel" aria-labelledby="budget-heading">
+      <div class="heading">
+        <h1 id="budget-heading">Budgets</h1>
+        <button type="button" id="budget-refresh" aria-label="Refresh budgets">Refresh</button>
+      </div>
+      <p id="budget-status" role="status">Loading budgets from Firefly III…</p>
+      <ul id="budget-list" tabindex="0" aria-label="Budgets" hidden></ul>
+      <div id="budget-navigation" hidden>
+        <button type="button" id="budget-prev" aria-controls="budget-list">Previous</button>
+        <button type="button" id="budget-next" aria-controls="budget-list">Next</button>
+      </div>
+    </section>
+    <section class="panel" aria-labelledby="account-heading">
+      <div class="heading">
+        <h2 id="account-heading">Accounts</h2>
+        <button id="refresh" type="button">Refresh</button>
+      </div>
+      <p id="status" role="status">Loading accounts from Firefly III…</p>
+      <div id="groups"></div>
+      <template id="account-table">
+      <table>
+        <thead><tr><th scope="col">Account name</th><th scope="col">Current balance</th></tr></thead>
+        <tbody></tbody>
+      </table>
+      </template>
+    </section>
   </main>
 </body>
 </html>

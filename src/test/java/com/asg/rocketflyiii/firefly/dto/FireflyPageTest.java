@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 import tools.jackson.databind.ObjectMapper;
 
-class FireflyAccountResponseTest {
+class FireflyPageTest {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -27,8 +27,7 @@ class FireflyAccountResponseTest {
                 }
                 """;
 
-        FireflyAccountResponse response =
-                objectMapper.readValue(json, FireflyAccountResponse.class);
+        FireflyPage response = objectMapper.readValue(json, FireflyPage.class);
 
         assertEquals(750, response.meta().pagination().total());
         assertEquals(50, response.meta().pagination().per_page());

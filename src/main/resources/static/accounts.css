@@ -21,7 +21,7 @@ header {
 }
 main { width: min(90%, 62rem); margin: clamp(2rem, 6vw, 5rem) auto; }
 .heading { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
-h1 { margin: 0; font-size: clamp(2rem, 5vw, 3.5rem); letter-spacing: -.045em; }
+h1, h2 { margin: 0; font-size: clamp(2rem, 5vw, 3.5rem); letter-spacing: -.045em; }
 button {
   padding: .65rem 1rem;
   border: 1px solid #668575;
@@ -33,14 +33,39 @@ button {
 }
 button:hover { background: #eaf1e9; }
 summary:focus-visible, button:focus-visible { outline: 3px solid #257357; outline-offset: 3px; }
-#status { margin: .65rem 0 1.8rem; color: #466153; }
+#status, #budget-status { margin: .65rem 0 1.8rem; color: #466153; }
 table { width: 100%; border-collapse: collapse; background: white; }
 th, td { text-align: left; padding: .9rem clamp(.6rem, 2vw, 1.4rem); border-bottom: 1px solid #d7dfd8; overflow-wrap: anywhere; }
 thead th { background: #e7efe6; font-size: .85rem; }
 th:last-child, td:last-child { text-align: right; font-variant-numeric: tabular-nums; }
 
-main { background: white; border: 1px solid #d7dfd8; border-radius: .8rem; padding: clamp(1rem, 3vw, 2rem); }
+.panel { background: white; border: 1px solid #d7dfd8; border-radius: .8rem; padding: clamp(1rem, 3vw, 2rem); }
 details { border-top: 1px solid #d7dfd8; }
 summary { padding: 1rem .3rem; font-size: 1.15rem; font-weight: 650; cursor: pointer; }
 summary::marker { color: #43765c; }
 details p { color: #466153; padding-inline: .5rem; }
+
+.panel + .panel { margin-top: 1.5rem; }
+#budget-list:not([hidden]) {
+  display: flex;
+  gap: .85rem;
+  margin: 0;
+  padding: 0 0 .65rem;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  list-style: none;
+}
+#budget-list li {
+  flex: 0 0 min(15rem, 85%);
+  min-width: 0;
+  padding: 1rem;
+  border: 1px solid #c8d9ce;
+  border-radius: .55rem;
+  background: #f3f7f2;
+  scroll-snap-align: start;
+  overflow-wrap: anywhere;
+}
+#budget-list strong { display: block; margin-bottom: .6rem; }
+#budget-list span { color: #466153; font-size: .9rem; }
+#budget-navigation { margin-top: .65rem; text-align: right; }
+#budget-navigation button:disabled { opacity: .5; cursor: default; }

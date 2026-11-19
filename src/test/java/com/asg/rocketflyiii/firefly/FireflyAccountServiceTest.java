@@ -4,8 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
 import com.asg.rocketflyiii.firefly.api.FireflyClient;
-import com.asg.rocketflyiii.firefly.dto.FireflyAccountResponse;
 import com.asg.rocketflyiii.firefly.dto.FireflyMeta;
+import com.asg.rocketflyiii.firefly.dto.FireflyPage;
 import com.asg.rocketflyiii.firefly.dto.FireflyPagination;
 import com.asg.rocketflyiii.firefly.services.FireflyAccountService;
 import java.util.List;
@@ -40,14 +40,14 @@ class FireflyAccountServiceTest {
         verifyNoMoreInteractions(client);
     }
 
-    private FireflyAccountResponse response(int currentPage, int totalPages, String accountId) {
+    private FireflyPage response(int currentPage, int totalPages, String accountId) {
 
         JsonNode account = mapper.readTree("{\"id\":\"" + accountId + "\"}");
 
         FireflyPagination pagination =
                 new FireflyPagination(totalPages, 1, 1, currentPage, totalPages);
 
-        return new FireflyAccountResponse(List.of(account), new FireflyMeta(pagination));
+        return new FireflyPage(List.of(account), new FireflyMeta(pagination));
     }
 
     @Test
