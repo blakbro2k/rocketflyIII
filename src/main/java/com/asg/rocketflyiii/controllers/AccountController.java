@@ -21,7 +21,7 @@ public class AccountController {
 
     @GetMapping("/api/accounts")
     public List<JsonNode> getAccounts(@RequestParam(defaultValue = "asset") String type) {
-        if (!Set.of("asset", "expense", "liability", "revenue").contains(type)) {
+        if (!Set.of("asset", "liability").contains(type)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unsupported account type");
         }
         return accounts.getAccounts(type);

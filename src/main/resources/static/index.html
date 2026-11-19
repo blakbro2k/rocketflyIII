@@ -14,18 +14,14 @@
       <h1>Accounts</h1>
       <button id="refresh" type="button">Refresh</button>
     </div>
-    <label for="account-type">Account type</label>
-    <select id="account-type">
-      <option value="asset">Assets</option>
-      <option value="expense">Expenses</option>
-      <option value="liability">Liabilities</option>
-      <option value="revenue">Revenue</option>
-    </select>
     <p id="status" role="status">Loading accounts from Firefly III…</p>
-    <table hidden aria-label="Firefly III accounts">
+    <div id="groups"></div>
+    <template id="account-table">
+    <table>
       <thead><tr><th scope="col">Account name</th><th scope="col">Current balance</th></tr></thead>
       <tbody></tbody>
     </table>
+    </template>
   </main>
 </body>
 </html>

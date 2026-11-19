@@ -38,7 +38,7 @@ class AccountControllerTest {
                     .build();
 
     @ParameterizedTest
-    @ValueSource(strings = {"asset", "expense", "liability", "revenue"})
+    @ValueSource(strings = {"asset", "liability"})
     void filtersEveryPageBySelectedType(String type) throws Exception {
         String url = BASE + "/api/v1/accounts?type=" + type;
         server.expect(requestTo(url))
@@ -50,9 +50,10 @@ class AccountControllerTest {
         mvc.perform(get("/api/accounts").param("type", type)).andExpect(status().isOk());
     }
 
-    @Test
-    void rejectsUnsupportedType() throws Exception {
-        mvc.perform(get("/api/accounts").param("type", "other")).andExpect(status().isBadRequest());
+    @ParameterizedTest
+    @ValueSource(strings = {"expense", "revenue", "other"})
+    void rejectsUnsupportedType(String type) throws Exception {
+        mvc.perform(get("/api/accounts").param("type", type)).andExpect(status().isBadRequest());
     }
 
     @AfterEach
