@@ -11,6 +11,7 @@ public final class FireflyEndpoints {
         // Prevent instantiation.
     }
 
+    public static final String BUDGETS = "/api/v1/budgets";
     public static final String ABOUT = "/api/v1/about";
     public static final String ACCOUNTS = "/api/v1/accounts";
 }

@@ -10,7 +10,7 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 import com.asg.rocketflyiii.config.FireflyProperties;
 import com.asg.rocketflyiii.firefly.api.FireflyClient;
 import com.asg.rocketflyiii.firefly.api.FireflyEndpoints;
-import com.asg.rocketflyiii.firefly.dto.FireflyAccountResponse;
+import com.asg.rocketflyiii.firefly.dto.FireflyPage;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -131,7 +131,7 @@ class FireflyClientTest {
                 .andExpect(header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
                 .andRespond(withSuccess(responseBody, MediaType.APPLICATION_JSON));
 
-        FireflyAccountResponse response = client.getAccountsPage(2);
+        FireflyPage response = client.getAccountsPage(2);
 
         assertEquals(2, response.meta().pagination().current_page());
         assertEquals(15, response.meta().pagination().total_pages());
