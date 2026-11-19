@@ -8,6 +8,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.asg.rocketflyiii.config.FireflyProperties;
+import com.asg.rocketflyiii.controllers.AccountController;
+import com.asg.rocketflyiii.firefly.api.FireflyClient;
+import com.asg.rocketflyiii.firefly.services.FireflyAccountService;
 import java.io.IOException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -33,6 +36,25 @@ class AccountControllerTest {
             MockMvcBuilders.standaloneSetup(
                             new AccountController(new FireflyAccountService(client)))
                     .build();
+
+    @ParameterizedTest
+    @ValueSource(strings = {"asset", "liability"})
+    void filtersEveryPageBySelectedType(String type) throws Exception {
+        String url = BASE + "/api/v1/accounts?type=" + type;
+        server.expect(requestTo(url))
+                .andExpect(method(HttpMethod.GET))
+                .andRespond(page(1, 2, "[]"));
+        server.expect(requestTo(url + "&page=2"))
+                .andExpect(method(HttpMethod.GET))
+                .andRespond(page(2, 2, "[]"));
+        mvc.perform(get("/api/accounts").param("type", type)).andExpect(status().isOk());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"expense", "revenue", "other"})
+    void rejectsUnsupportedType(String type) throws Exception {
+        mvc.perform(get("/api/accounts").param("type", type)).andExpect(status().isBadRequest());
+    }
 
     @AfterEach
     void verifyRequests() {

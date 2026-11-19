@@ -1,5 +1,6 @@
-package com.asg.rocketflyiii.firefly;
+package com.asg.rocketflyiii.firefly.services;
 
+import com.asg.rocketflyiii.firefly.api.FireflyClient;
 import com.asg.rocketflyiii.firefly.dto.FireflyAccountResponse;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +27,11 @@ public class FireflyAccountService {
     }
 
     public List<JsonNode> getAssetAccounts() {
-        return collectPages(client::getAssetAccountsPage);
+        return getAccounts("asset");
+    }
+
+    public List<JsonNode> getAccounts(String type) {
+        return collectPages(page -> client.getAccountsPage(type, page));
     }
 
     private List<JsonNode> collectPages(IntFunction<FireflyAccountResponse> fetchPage) {

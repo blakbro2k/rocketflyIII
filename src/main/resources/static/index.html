@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Accounts · RocketFlyIII</title>
+  <link rel="stylesheet" href="accounts.css">
+  <script src="accounts.js" defer></script>
+</head>
+<body>
+  <header><span class="mark" aria-hidden="true">↗</span> RocketFlyIII</header>
+  <main>
+    <div class="heading">
+      <h1>Accounts</h1>
+      <button id="refresh" type="button">Refresh</button>
+    </div>
+    <p id="status" role="status">Loading accounts from Firefly III…</p>
+    <div id="groups"></div>
+    <template id="account-table">
+    <table>
+      <thead><tr><th scope="col">Account name</th><th scope="col">Current balance</th></tr></thead>
+      <tbody></tbody>
+    </table>
+    </template>
+  </main>
+</body>
+</html>

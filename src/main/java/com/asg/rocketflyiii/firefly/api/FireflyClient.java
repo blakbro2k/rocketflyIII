@@ -1,4 +1,4 @@
-package com.asg.rocketflyiii.firefly;
+package com.asg.rocketflyiii.firefly.api;
 
 import com.asg.rocketflyiii.config.FireflyProperties;
 import com.asg.rocketflyiii.firefly.dto.FireflyAccountResponse;
@@ -77,7 +77,11 @@ public class FireflyClient {
         return new ObjectMapper().readValue(json, FireflyAccountResponse.class);
     }
 
-    FireflyAccountResponse getAssetAccountsPage(int page) {
+    public FireflyAccountResponse getAssetAccountsPage(int page) {
+        return getAccountsPage("asset", page);
+    }
+
+    public FireflyAccountResponse getAccountsPage(String type, int page) {
         try {
             FireflyAccountResponse response =
                     restClient
@@ -86,7 +90,7 @@ public class FireflyClient {
                                     builder -> {
                                         var uri =
                                                 builder.path(FireflyEndpoints.ACCOUNTS)
-                                                        .queryParam("type", "asset");
+                                                        .queryParam("type", type);
                                         if (page > 1) {
                                             uri.queryParam("page", page);
                                         }
