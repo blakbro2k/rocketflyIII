@@ -1,5 +1,6 @@
-package com.asg.rocketflyiii.firefly;
+package com.asg.rocketflyiii.firefly.services;
 
+import com.asg.rocketflyiii.firefly.api.FireflyClient;
 import com.asg.rocketflyiii.firefly.dto.FireflyAccountResponse;
 import java.util.ArrayList;
 import java.util.List;

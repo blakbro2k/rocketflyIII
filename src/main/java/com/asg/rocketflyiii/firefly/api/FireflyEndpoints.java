@@ -1,4 +1,4 @@
-package com.asg.rocketflyiii.firefly;
+package com.asg.rocketflyiii.firefly.api;
 
 /**
  * Supported Firefly III REST API endpoints.

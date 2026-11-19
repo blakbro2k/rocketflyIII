@@ -8,6 +8,8 @@ import static org.springframework.test.web.client.match.MockRestRequestMatchers.
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 import com.asg.rocketflyiii.config.FireflyProperties;
+import com.asg.rocketflyiii.firefly.api.FireflyClient;
+import com.asg.rocketflyiii.firefly.api.FireflyEndpoints;
 import com.asg.rocketflyiii.firefly.dto.FireflyAccountResponse;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;

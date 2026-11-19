@@ -1,4 +1,4 @@
-package com.asg.rocketflyiii.firefly;
+package com.asg.rocketflyiii.firefly.api;
 
 import com.asg.rocketflyiii.config.FireflyProperties;
 import com.asg.rocketflyiii.firefly.dto.FireflyAccountResponse;
@@ -77,7 +77,7 @@ public class FireflyClient {
         return new ObjectMapper().readValue(json, FireflyAccountResponse.class);
     }
 
-    FireflyAccountResponse getAssetAccountsPage(int page) {
+    public FireflyAccountResponse getAssetAccountsPage(int page) {
         try {
             FireflyAccountResponse response =
                     restClient
