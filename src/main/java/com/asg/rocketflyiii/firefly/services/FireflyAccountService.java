@@ -27,7 +27,11 @@ public class FireflyAccountService {
     }
 
     public List<JsonNode> getAssetAccounts() {
-        return collectPages(client::getAssetAccountsPage);
+        return getAccounts("asset");
+    }
+
+    public List<JsonNode> getAccounts(String type) {
+        return collectPages(page -> client.getAccountsPage(type, page));
     }
 
     private List<JsonNode> collectPages(IntFunction<FireflyAccountResponse> fetchPage) {

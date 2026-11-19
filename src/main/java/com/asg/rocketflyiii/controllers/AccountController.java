@@ -1,10 +1,13 @@
 package com.asg.rocketflyiii.controllers;
 
-import java.util.List;
-
 import com.asg.rocketflyiii.firefly.services.FireflyAccountService;
+import java.util.List;
+import java.util.Set;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 import tools.jackson.databind.JsonNode;
 
 @RestController
@@ -17,7 +20,10 @@ public class AccountController {
     }
 
     @GetMapping("/api/accounts")
-    public List<JsonNode> getAssetAccounts() {
-        return accounts.getAssetAccounts();
+    public List<JsonNode> getAccounts(@RequestParam(defaultValue = "asset") String type) {
+        if (!Set.of("asset", "expense", "liability", "revenue").contains(type)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unsupported account type");
+        }
+        return accounts.getAccounts(type);
     }
 }

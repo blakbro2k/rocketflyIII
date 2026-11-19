@@ -78,6 +78,10 @@ public class FireflyClient {
     }
 
     public FireflyAccountResponse getAssetAccountsPage(int page) {
+        return getAccountsPage("asset", page);
+    }
+
+    public FireflyAccountResponse getAccountsPage(String type, int page) {
         try {
             FireflyAccountResponse response =
                     restClient
@@ -86,7 +90,7 @@ public class FireflyClient {
                                     builder -> {
                                         var uri =
                                                 builder.path(FireflyEndpoints.ACCOUNTS)
-                                                        .queryParam("type", "asset");
+                                                        .queryParam("type", type);
                                         if (page > 1) {
                                             uri.queryParam("page", page);
                                         }

@@ -22,7 +22,8 @@ header {
 main { width: min(90%, 62rem); margin: clamp(2rem, 6vw, 5rem) auto; }
 .heading { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
 h1 { margin: 0; font-size: clamp(2rem, 5vw, 3.5rem); letter-spacing: -.045em; }
-button {
+label[for="account-type"] { display: inline-block; margin: 1.4rem .4rem 0 0; }
+select, button {
   padding: .65rem 1rem;
   border: 1px solid #668575;
   border-radius: .4rem;
