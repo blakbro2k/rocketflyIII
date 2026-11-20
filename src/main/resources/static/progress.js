@@ -16,23 +16,48 @@ export function renderProgress(container, totals, transactions, month) {
   const caption = document.createElement("figcaption");
   caption.textContent = "Cumulative spending · " + totals.currency;
   const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-  svg.setAttribute("viewBox", "0 0 500 132");
+  svg.setAttribute("viewBox", "0 0 460 180");
   svg.setAttribute("role", "img");
   svg.setAttribute("aria-label", "Cumulative spending: " + money(totals.spent, totals.currency));
   const maximum = Math.max(totals.limit || 0, totals.spent, 1);
-  const points = ["2,130"];
+  const magnitude = 10 ** Math.floor(Math.log10(maximum / 4));
+  const step = [1, 2, 2.5, 5, 10].find(n => n * magnitude >= maximum / 4) * magnitude;
+  const intervals = Math.ceil(maximum / step);
+  const ceiling = intervals * step;
+  const formatter = new Intl.NumberFormat(undefined, {
+    notation: ceiling >= 100000 ? "compact" : "standard", maximumSignificantDigits: 4
+  });
+  const x = day => 64 + (day - 1) / (days - 1) * 382;
+  const y = amount => 144 - amount / ceiling * 132;
+
+  function element(tag, attributes, text) {
+    const node = document.createElementNS(svg.namespaceURI, tag);
+    for (const [key, value] of Object.entries(attributes)) node.setAttribute(key, value);
+    if (text != null) node.textContent = text;
+    svg.append(node);
+  }
+
+  for (let i = 0; i <= intervals; i++) {
+    const amount = i * step;
+    const height = y(amount);
+    element("line", { x1: 59, x2: x(days), y1: height, y2: height });
+    element("text", { x: 54, y: height + 4, "text-anchor": "end" }, formatter.format(amount));
+  }
+  element("line", { x1: x(1), x2: x(1), y1: y(ceiling), y2: y(0) });
+  for (let day = 1; day <= days; day++) {
+    const labeled = [1, 7, 14, 21, days].includes(day);
+    element("line", { x1: x(day), x2: x(day), y1: 144, y2: labeled ? 151 : 147 });
+    if (labeled) element("text", { x: x(day), y: 168, "text-anchor": "middle" }, day);
+  }
+  const points = [];
   let spent = 0;
   for (let day = 1; day <= lastDay; day++) {
     spent += daily[day];
-    points.push((2 + (day - 1) / (days - 1) * 496) + "," + (130 - spent / maximum * 126));
+    points.push(x(day) + "," + y(spent));
   }
-  const line = document.createElementNS(svg.namespaceURI, "polyline");
-  line.setAttribute("points", points.join(" "));
-  svg.append(line);
-  const axis = document.createElement("div");
-  axis.className = "budget-axis";
-  axis.append("Day 1", Object.assign(document.createElement("span"), { textContent: "Day " + days }));
-  figure.append(caption, document.createTextNode(money(maximum, totals.currency)), svg, axis);
+  element("polyline", { points: points.join(" ") });
+  if (lastDay === 1) element("circle", { cx: x(1), cy: y(spent), r: 2, fill: "#ac3434" });
+  figure.append(caption, svg);
   container.append(figure);
 
   if (!(totals.limit > 0)) return;
