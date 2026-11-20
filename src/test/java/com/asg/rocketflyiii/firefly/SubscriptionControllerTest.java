@@ -67,6 +67,33 @@ class SubscriptionControllerTest {
                 .andExpect(jsonPath("$.paid_dates").isArray());
     }
 
+    @Test
+    void summarizesLinkedPaymentsAcrossYearsAndListsRules() throws Exception {
+        server.expect(requestTo(startsWith("https://firefly.test/api/v1/bills/7?")))
+                .andRespond(
+                        withSuccess(
+                                "{\"data\":{\"attributes\":{\"currency_code\":\"USD\"}}}",
+                                MediaType.APPLICATION_JSON));
+        expectPage(
+                "/7/transactions",
+                page(
+                        """
+                        [{"attributes":{"transactions":[
+                          {"bill_id":"7","date":"2024-02-03","currency_code":"USD","amount":"12"},
+                          {"bill_id":"7","date":"2023-12-03","currency_code":"USD","amount":"8"},
+                          {"bill_id":"9","date":"2024-02-03","currency_code":"USD","amount":"100"}
+                        ]}}]
+                        """,
+                        1,
+                        1));
+        expectPage("/7/rules", page("[{\"attributes\":{\"title\":\"Music rule\"}}]", 1, 1));
+        mvc.perform(get("/api/subscriptions/7/summary").param("month", "2024-02"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.annualAverage").value(-12))
+                .andExpect(jsonPath("$.overallAverage").value(-10))
+                .andExpect(jsonPath("$.rules[0]").value("Music rule"));
+    }
+
     @AfterEach
     void verifyRequests() {
         server.verify();

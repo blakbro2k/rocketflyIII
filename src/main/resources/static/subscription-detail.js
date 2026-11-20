@@ -1,5 +1,5 @@
 import { monthPicker } from "./settings.js";
-import { money } from "./budget-chart.js";
+import { amount, dateLabel, repeats } from "./subscription-format.js";
 
 const month = monthPicker.value;
 const id = new URLSearchParams(location.search).get("id");
@@ -11,35 +11,34 @@ async function loadSubscription() {
   const status = document.querySelector("#status");
   try {
     if (!/^\d+$/.test(id)) throw new Error();
-    const response = await fetch("/api/subscriptions/" + id + "?month=" + month, { cache: "no-store" });
+    const response = await fetch("/api/subscriptions/" + id + "/summary?month=" + month, { cache: "no-store" });
     if (!response.ok) throw new Error();
-    const bill = await response.json();
+    const { bill, annualAverage, overallAverage, rules } = await response.json();
     if (typeof bill.name !== "string" || typeof bill.active !== "boolean") throw new Error();
     document.querySelector("#name").textContent = bill.name;
     document.title = bill.name + " · RocketFlyIII";
-    const details = [bill.active ? "Active" : "Inactive"];
-    if (bill.repeat_freq) details.push(bill.repeat_freq);
-    if (bill.amount_min != null && bill.amount_max != null && bill.currency_code) {
-      const low = money(bill.amount_min, bill.currency_code);
-      const high = money(bill.amount_max, bill.currency_code);
-      details.push(low === high ? low : low + " – " + high);
-    }
-    document.querySelector("#definition").textContent = details.join(" · ");
-    if (!Array.isArray(bill.paid_dates)) {
-      status.textContent = "Payment history unavailable.";
-      return;
-    }
-    const rows = bill.paid_dates.filter(payment => payment.date?.startsWith(month + "-"))
-      .sort((a, b) => b.date.localeCompare(a.date));
-    const table = document.querySelector("#payments");
-    for (const payment of rows) {
+    const low = amount(bill.amount_min, bill.currency_code);
+    const high = amount(bill.amount_max, bill.currency_code);
+    document.querySelector("#definition").textContent =
+      "Subscription matches transactions " + (low === high ? "of " + low : "between " + low + " and " + high)
+      + ". Repeats " + repeats(bill) + ".";
+    const table = document.querySelector("#summary");
+    for (const [label, value] of [
+      ["Subscription is active", bill.active ? "Yes" : "No"],
+      ["Next expected match", dateLabel(bill.next_expected_match)],
+      ["Average subscription amount (" + month.slice(0, 4) + ")", amount(annualAverage, bill.currency_code)],
+      ["Average subscription amount (overall)", amount(overallAverage, bill.currency_code)],
+      ["Related rules", rules.join("\n") || "None"]
+    ]) {
       const row = table.tBodies[0].insertRow();
-      row.insertCell().textContent = payment.date.slice(0, 10);
-      const currency = payment.currency_code || bill.currency_code;
-      row.insertCell().textContent = payment.amount != null && currency ? money(payment.amount, currency) : "—";
+      const heading = document.createElement("th");
+      heading.scope = "row";
+      heading.textContent = label;
+      row.append(heading);
+      row.insertCell().textContent = value;
     }
-    table.hidden = rows.length === 0;
-    status.textContent = rows.length ? "" : "No linked payments this month.";
+    table.hidden = false;
+    status.textContent = "";
   } catch {
     status.textContent = "Couldn’t load this subscription. Refresh to try again.";
   }

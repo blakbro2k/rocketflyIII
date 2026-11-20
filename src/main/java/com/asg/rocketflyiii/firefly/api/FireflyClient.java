@@ -100,6 +100,21 @@ public class FireflyClient {
         return getPage(FireflyEndpoints.BILLS, Map.of(), page);
     }
 
+    public FireflyPage getSubscriptionsPage(YearMonth month, int page) {
+        return getPage(
+                FireflyEndpoints.BILLS,
+                Map.of("start", month.atDay(1).toString(), "end", month.atEndOfMonth().toString()),
+                page);
+    }
+
+    public FireflyPage getSubscriptionTransactions(long id, int page) {
+        return getPage(FireflyEndpoints.BILLS + "/" + id + "/transactions", Map.of(), page);
+    }
+
+    public FireflyPage getSubscriptionRules(long id, int page) {
+        return getPage(FireflyEndpoints.BILLS + "/" + id + "/rules", Map.of(), page);
+    }
+
     public FireflyPage getBudgetTransactions(long id, YearMonth month, int page) {
         return getBudgetPage(id, "transactions", month, page);
     }
