@@ -1,3 +1,4 @@
+import { loadActivity, renderChart } from "./budget-chart.js";
 const budgetList = document.querySelector("#budget-list");
 const budgetStatus = document.querySelector("#budget-status");
 const budgetRefresh = document.querySelector("#budget-refresh");
@@ -20,7 +21,11 @@ function moveBudgets(direction) {
   }
 }
 
+import { monthPicker } from "./settings.js";
+
 async function loadBudgets() {
+  const month = monthPicker.value;
+  monthPicker.disabled = true;
   budgetRefresh.disabled = true;
   budgetStatus.textContent = "Loading budgets from Firefly III…";
   try {
@@ -28,16 +33,23 @@ async function loadBudgets() {
     if (!response.ok) throw new Error("Budget request failed");
     const budgets = await response.json();
     const cards = document.createDocumentFragment();
-    for (const { attributes } of budgets) {
+    for (const { id, attributes } of budgets) {
       if (typeof attributes.name !== "string" || typeof attributes.active !== "boolean") {
         throw new Error("Invalid budget");
       }
       const card = document.createElement("li");
       const name = document.createElement("strong");
-      const status = document.createElement("span");
       name.textContent = attributes.name;
-      status.textContent = attributes.active ? "Active" : "Inactive";
-      card.append(name, status);
+      const link = document.createElement("a");
+      link.className = "budget-link";
+      link.href = "budget.html?" + new URLSearchParams({ id, month });
+      link.append(name);
+      const chart = document.createElement("div");
+      chart.textContent = "Loading chart…";
+      card.append(link, chart);
+      loadActivity(id, month).then(activity => {
+        renderChart(chart, activity, { compact: true });
+      }).catch(() => { chart.textContent = "Chart unavailable."; });
       cards.append(card);
     }
     budgetList.replaceChildren(cards);
@@ -51,6 +63,7 @@ async function loadBudgets() {
       ? "Refresh failed. Showing the previous budgets."
       : "Couldn’t load budgets from Firefly III. Select Refresh to try again.";
   } finally {
+    monthPicker.disabled = false;
     budgetRefresh.disabled = false;
   }
 }
@@ -61,3 +74,6 @@ budgetRefresh.addEventListener("click", loadBudgets);
 budgetList.addEventListener("scroll", updateBudgetNavigation);
 new ResizeObserver(updateBudgetNavigation).observe(budgetList);
 loadBudgets();
+window.addEventListener("pageshow", event => {
+  if (event.persisted) loadBudgets();
+});

@@ -2,6 +2,7 @@ package com.asg.rocketflyiii.firefly;
 
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.header;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.queryParam;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -64,6 +65,55 @@ class BudgetControllerTest {
                 .andExpect(jsonPath("$.length()").value(2))
                 .andExpect(jsonPath("$[0].attributes.name").value("Food"))
                 .andExpect(jsonPath("$[1].attributes.active").value(false));
+    }
+
+    @Test
+    void reportsScopedMonthlyActivityAcrossPages() throws Exception {
+        String base = "https://firefly.test/api/v1/budgets/7/";
+        server.expect(
+                        request ->
+                                org.junit.jupiter.api.Assertions.assertEquals(
+                                        base + "limits",
+                                        request.getURI().toString().split("[?]")[0]))
+                .andExpect(queryParam("start", "2026-11-01"))
+                .andExpect(queryParam("end", "2026-11-30"))
+                .andExpect(method(HttpMethod.GET))
+                .andRespond(
+                        page(
+                                """
+                [{"attributes":{"amount":"100.00","currency_code":"USD","start":"2026-11-01","end":"2026-11-30"}}]
+                """,
+                                1,
+                                1));
+        String group =
+                """
+                [{"attributes":{"transactions":[
+                {"budget_id":"7","type":"withdrawal","description":"Food","date":"2026-11-02","currency_code":"USD","amount":"75.15"},
+                {"budget_id":"8","type":"withdrawal","description":"Other","date":"2026-11-02","currency_code":"USD","amount":"20"}
+                ]}}]
+                """;
+        server.expect(
+                        request ->
+                                org.junit.jupiter.api.Assertions.assertEquals(
+                                        "/api/v1/budgets/7/transactions",
+                                        request.getURI().getPath()))
+                .andExpect(queryParam("start", "2026-11-01"))
+                .andRespond(page(group, 1, 2));
+        server.expect(queryParam("page", "2"))
+                .andExpect(queryParam("end", "2026-11-30"))
+                .andRespond(
+                        page(
+                                """
+                [{"attributes":{"transactions":[{"budget_id":"7","type":"transfer","description":"Funding","date":"2026-11-10","currency_code":"USD","amount":"10.25"}]}}]
+                """,
+                                2,
+                                2));
+        mvc.perform(get("/api/budgets/7/activity").param("month", "2026-11"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.transactions.length()").value(2))
+                .andExpect(jsonPath("$.transactions[0].type").value("transfer"))
+                .andExpect(jsonPath("$.currencies[0].remaining").value(24.85))
+                .andExpect(jsonPath("$.currencies[0].remainingWithTransfers").value(35.10));
     }
 
     @Test
