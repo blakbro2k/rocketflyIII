@@ -2,8 +2,7 @@ package com.asg.rocketflyiii.firefly.api;
 
 import com.asg.rocketflyiii.config.FireflyProperties;
 import com.asg.rocketflyiii.firefly.dto.FireflyPage;
-import java.time.YearMonth;
-import java.util.Map;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.ResourceAccessException;
@@ -11,7 +10,13 @@ import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.server.ResponseStatusException;
+
+import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
+
+import java.time.LocalDate;
+import java.time.YearMonth;
+import java.util.Map;
 
 @Component
 public class FireflyClient {
@@ -111,32 +116,54 @@ public class FireflyClient {
     }
 
     private FireflyPage getPage(String endpoint, Map<String, String> parameters, int page) {
+        FireflyPage response = read(endpoint, parameters, page, FireflyPage.class);
+        if (response == null
+                || response.data() == null
+                || response.meta() == null
+                || response.meta().pagination() == null
+                || response.meta().pagination().current_page() != page
+                || response.meta().pagination().total_pages() < page
+                || response.data().stream()
+                        .anyMatch(account -> account == null || !account.isObject())) {
+            throw invalidResponse();
+        }
+        return response;
+    }
+
+    public JsonNode getDatedAccount(long id, LocalDate date) {
+        JsonNode response =
+                read(
+                        FireflyEndpoints.ACCOUNTS + "/" + id,
+                        Map.of("date", date.toString()),
+                        1,
+                        JsonNode.class);
+        if (response == null || !response.path("data").path("attributes").isObject())
+            throw invalidResponse();
+        return response.path("data").path("attributes");
+    }
+
+    public FireflyPage getAccountTransactions(long id, YearMonth month, int page) {
+        return getPage(
+                FireflyEndpoints.ACCOUNTS + "/" + id + "/transactions",
+                Map.of("start", month.atDay(1).toString(), "end", month.atEndOfMonth().toString()),
+                page);
+    }
+
+    private <T> T read(String endpoint, Map<String, String> parameters, int page, Class<T> type) {
         try {
-            FireflyPage response =
-                    restClient
-                            .get()
-                            .uri(
-                                    builder -> {
-                                        var uri = builder.path(endpoint);
-                                        parameters.forEach(uri::queryParam);
-                                        if (page > 1) {
-                                            uri.queryParam("page", page);
-                                        }
-                                        return uri.build();
-                                    })
-                            .retrieve()
-                            .body(FireflyPage.class);
-            if (response == null
-                    || response.data() == null
-                    || response.meta() == null
-                    || response.meta().pagination() == null
-                    || response.meta().pagination().current_page() != page
-                    || response.meta().pagination().total_pages() < page
-                    || response.data().stream()
-                            .anyMatch(account -> account == null || !account.isObject())) {
-                throw invalidResponse();
-            }
-            return response;
+            return restClient
+                    .get()
+                    .uri(
+                            builder -> {
+                                var uri = builder.path(endpoint);
+                                parameters.forEach(uri::queryParam);
+                                if (page > 1) {
+                                    uri.queryParam("page", page);
+                                }
+                                return uri.build();
+                            })
+                    .retrieve()
+                    .body(type);
         } catch (ResourceAccessException ex) {
             throw new ResponseStatusException(
                     HttpStatus.SERVICE_UNAVAILABLE, "Firefly III is unreachable");

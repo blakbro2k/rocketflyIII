@@ -1,3 +1,5 @@
+import { monthPicker } from "./settings.js";
+
 const refresh = document.querySelector("#refresh");
 const statusLine = document.querySelector("#status");
 const groups = document.querySelector("#groups");
@@ -34,9 +36,12 @@ function accountGroup(key, label, accounts, collapsed) {
 
   const table = tableTemplate.content.querySelector("table").cloneNode(true);
   table.setAttribute("aria-label", label);
-  for (const { attributes } of accounts) {
+  for (const { id, attributes } of accounts) {
     const row = table.tBodies[0].insertRow();
-    row.insertCell().textContent = attributes.name;
+    const link = document.createElement("a");
+    link.href = "account.html?" + new URLSearchParams({ id, month: monthPicker.value });
+    link.textContent = attributes.name;
+    row.insertCell().append(link);
     const amount = attributes.current_balance;
     row.insertCell().textContent = amount == null || amount === ""
       ? "—" : [amount, attributes.currency_code].filter(value => value != null && value !== "").join(" ");
