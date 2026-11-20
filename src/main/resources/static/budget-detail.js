@@ -1,8 +1,11 @@
-import { currentMonth, loadActivity, money, renderChart, transferToggle } from "./budget-chart.js";
+import { loadActivity, money, renderChart, transferToggle } from "./budget-chart.js";
 
 const params = new URLSearchParams(location.search);
 const id = params.get("id");
-const month = params.get("month") || currentMonth();
+import { monthPicker } from "./settings.js";
+import { renderProgress } from "./progress.js";
+const month = monthPicker.value;
+document.querySelector(".budget-detail a").href = "/?month=" + month;
 const chart = document.querySelector("#chart");
 const transactionStatus = document.querySelector("#transaction-status");
 
@@ -19,11 +22,12 @@ async function showBudget() {
     const activity = await loadActivity(id, month);
     const draw = () => renderChart(chart, activity, toggle.input.checked);
     draw();
+    renderProgress(document.querySelector("#progress"), activity, month);
     toggle.input.addEventListener("change", draw);
     const table = document.querySelector("#transactions");
     for (const entry of activity.transactions) {
       const row = table.tBodies[0].insertRow();
-      for (const value of [entry.date, entry.description, entry.type, money(entry.amount, entry.currency)]) {
+      for (const value of [entry.description, money(entry.type === "withdrawal" ? -entry.amount : entry.amount, entry.currency), entry.runningBalance == null ? "—" : money(entry.runningBalance, entry.currency), entry.date, entry.source || "—", entry.destination || "—", entry.category || "—"]) {
         row.insertCell().textContent = value;
       }
     }

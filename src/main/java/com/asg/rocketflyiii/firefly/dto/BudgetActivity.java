@@ -14,7 +14,15 @@ import tools.jackson.databind.JsonNode;
 
 public record BudgetActivity(List<Totals> currencies, List<Entry> transactions) {
     public record Entry(
-            LocalDate date, String description, String type, String currency, BigDecimal amount) {}
+            LocalDate date,
+            String description,
+            String type,
+            String currency,
+            BigDecimal amount,
+            String source,
+            String destination,
+            String category,
+            String runningBalance) {}
 
     public record Totals(
             String currency,
@@ -79,7 +87,11 @@ public record BudgetActivity(List<Totals> currencies, List<Entry> transactions) 
                                 field(split, "description"),
                                 field(split, "type"),
                                 field(split, "currency_code"),
-                                amount(split));
+                                amount(split),
+                                split.path("source_name").asText(null),
+                                split.path("destination_name").asText(null),
+                                split.path("category_name").asText(null),
+                                split.path("running_balance").asText(null));
                 entries.add(entry);
                 Amounts totals = amounts.computeIfAbsent(entry.currency(), key -> new Amounts());
                 if ("withdrawal".equals(entry.type()))

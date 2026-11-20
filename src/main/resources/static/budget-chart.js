@@ -43,20 +43,21 @@ export function renderChart(container, activity, includeTransfers) {
       p.textContent = text;
       caption.append(p);
     }
-    line("Spent " + money(totals.spent, totals.currency));
+
     if (balance != null) {
-      const remaining = Math.max(0, balance);
-      const slices = totals.spent + remaining;
+      const available = Number(totals.limit) + (includeTransfers ? Number(totals.transfers) : 0);
       const pie = document.createElement("div");
       pie.className = "budget-pie";
       pie.setAttribute("aria-hidden", "true");
-      if (slices > 0) pie.style.background = "conic-gradient(#245b46 " + (100 * totals.spent / slices) + "%, #cadfce 0)";
+      const percent = available > 0 ? Math.min(100, 100 * totals.spent / available) : totals.spent > 0 ? 100 : 0;
+      pie.style.background = "conic-gradient(#bd3838 " + percent + "%, #419260 0)";
       figure.append(pie);
-      line((balance < 0 ? "Over by " : "Remaining ") + money(Math.abs(balance), totals.currency));
-      line("Limit " + money(totals.limit, totals.currency));
+      line(money(Math.abs(balance), totals.currency) + (balance < 0 ? " over budget" : " left to spend"));
+      line("Budget " + money(totals.limit, totals.currency));
     } else {
       line(totals.partialPeriod ? "Limit spans multiple months" : "No limit set");
     }
+    line("Spent " + money(totals.spent, totals.currency));
     if (includeTransfers) line("Transfer income " + money(totals.transfers, totals.currency));
     figure.append(caption);
     container.append(figure);

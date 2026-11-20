@@ -1,4 +1,4 @@
-import { currentMonth, loadActivity, renderChart, transferToggle } from "./budget-chart.js";
+import { loadActivity, renderChart, transferToggle } from "./budget-chart.js";
 const budgetList = document.querySelector("#budget-list");
 const budgetStatus = document.querySelector("#budget-status");
 const budgetRefresh = document.querySelector("#budget-refresh");
@@ -21,8 +21,7 @@ function moveBudgets(direction) {
   }
 }
 
-const monthPicker = document.querySelector("#budget-month");
-monthPicker.value = currentMonth();
+import { monthPicker } from "./settings.js";
 
 async function loadBudgets() {
   const month = monthPicker.value;
@@ -76,13 +75,6 @@ async function loadBudgets() {
 
 previous.addEventListener("click", () => moveBudgets(-1));
 next.addEventListener("click", () => moveBudgets(1));
-monthPicker.addEventListener("change", () => {
-  if (!monthPicker.value) monthPicker.value = currentMonth();
-  budgetList.replaceChildren();
-  budgetList.hidden = true;
-  updateBudgetNavigation();
-  loadBudgets();
-});
 budgetRefresh.addEventListener("click", loadBudgets);
 budgetList.addEventListener("scroll", updateBudgetNavigation);
 new ResizeObserver(updateBudgetNavigation).observe(budgetList);
