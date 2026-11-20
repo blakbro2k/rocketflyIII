@@ -47,5 +47,9 @@ export function renderChart(container, activity, { compact = false } = {}) {
     if (!compact) line("Spent " + money(totals.spent, totals.currency));
     figure.append(caption);
     container.append(figure);
+    if (compact) {
+      const link = container.parentElement?.querySelector(".budget-link");
+      if (link) link.title = [link.title, "Spent " + money(totals.spent, totals.currency) + " · " + caption.textContent].filter(Boolean).join("\n");
+    }
   }
 }

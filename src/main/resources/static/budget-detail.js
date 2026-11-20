@@ -19,7 +19,14 @@ async function showBudget() {
   try {
     const activity = await loadActivity(id, month);
     renderChart(chart, activity);
-    renderProgress(document.querySelector("#progress"), activity, month);
+    activity.currencies.forEach((totals, index) => {
+      const pair = document.createElement("section");
+      pair.className = "budget-plots";
+      const pie = chart.querySelectorAll(".budget-figure")[index];
+      pie.replaceWith(pair);
+      pair.append(pie);
+      renderProgress(pair, totals, activity.transactions, month);
+    });
     const table = document.querySelector("#transactions");
     for (const entry of activity.transactions) {
       const row = table.tBodies[0].insertRow();
