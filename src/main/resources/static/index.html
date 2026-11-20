@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Overview · RocketFlyIII</title>
   <link rel="stylesheet" href="accounts.css">
-  <script src="budgets.js" defer></script>
+  <script type="module" src="budgets.js"></script>
   <script src="subscriptions.js" defer></script>
   <script src="accounts.js" defer></script>
 </head>
@@ -17,6 +17,7 @@
         <h1 id="budget-heading">Budgets</h1>
         <button type="button" id="budget-refresh" aria-label="Refresh budgets">Refresh</button>
       </div>
+      <label class="month-picker">Budget month <input type="month" id="budget-month" required></label>
       <p id="budget-status" role="status">Loading budgets from Firefly III…</p>
       <ul id="budget-list" tabindex="0" aria-label="Budgets" hidden></ul>
       <div id="budget-navigation" hidden>

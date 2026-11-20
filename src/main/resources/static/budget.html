@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Budget · RocketFlyIII</title>
+  <link rel="stylesheet" href="accounts.css">
+  <script type="module" src="budget-detail.js"></script>
+</head>
+<body>
+  <header><span class="mark" aria-hidden="true">↗</span> RocketFlyIII</header>
+  <main class="panel budget-detail">
+    <a href="/">← Overview</a>
+    <h1 id="name">Budget</h1>
+    <p id="period"></p>
+    <div id="preference"></div>
+    <div id="chart" role="status">Loading budget activity…</div>
+    <h2>Transactions</h2>
+    <p id="transaction-status" role="status"></p>
+    <table id="transactions" hidden>
+      <thead><tr><th scope="col">Date</th><th scope="col">Description</th><th scope="col">Type</th><th scope="col">Amount</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </main>
+</body>
+</html>

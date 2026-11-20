@@ -1,3 +1,4 @@
+import { currentMonth, loadActivity, renderChart, transferToggle } from "./budget-chart.js";
 const budgetList = document.querySelector("#budget-list");
 const budgetStatus = document.querySelector("#budget-status");
 const budgetRefresh = document.querySelector("#budget-refresh");
@@ -20,7 +21,12 @@ function moveBudgets(direction) {
   }
 }
 
+const monthPicker = document.querySelector("#budget-month");
+monthPicker.value = currentMonth();
+
 async function loadBudgets() {
+  const month = monthPicker.value;
+  monthPicker.disabled = true;
   budgetRefresh.disabled = true;
   budgetStatus.textContent = "Loading budgets from Firefly III…";
   try {
@@ -28,7 +34,7 @@ async function loadBudgets() {
     if (!response.ok) throw new Error("Budget request failed");
     const budgets = await response.json();
     const cards = document.createDocumentFragment();
-    for (const { attributes } of budgets) {
+    for (const { id, attributes } of budgets) {
       if (typeof attributes.name !== "string" || typeof attributes.active !== "boolean") {
         throw new Error("Invalid budget");
       }
@@ -37,7 +43,19 @@ async function loadBudgets() {
       const status = document.createElement("span");
       name.textContent = attributes.name;
       status.textContent = attributes.active ? "Active" : "Inactive";
-      card.append(name, status);
+      const link = document.createElement("a");
+      link.className = "budget-link";
+      link.href = "budget.html?" + new URLSearchParams({ id, month });
+      link.append(name);
+      const chart = document.createElement("div");
+      chart.textContent = "Loading chart…";
+      const toggle = transferToggle(id);
+      card.append(link, status, chart, toggle.label);
+      loadActivity(id, month).then(activity => {
+        const draw = () => renderChart(chart, activity, toggle.input.checked);
+        draw();
+        toggle.input.addEventListener("change", draw);
+      }).catch(() => { chart.textContent = "Chart unavailable."; });
       cards.append(card);
     }
     budgetList.replaceChildren(cards);
@@ -51,13 +69,24 @@ async function loadBudgets() {
       ? "Refresh failed. Showing the previous budgets."
       : "Couldn’t load budgets from Firefly III. Select Refresh to try again.";
   } finally {
+    monthPicker.disabled = false;
     budgetRefresh.disabled = false;
   }
 }
 
 previous.addEventListener("click", () => moveBudgets(-1));
 next.addEventListener("click", () => moveBudgets(1));
+monthPicker.addEventListener("change", () => {
+  if (!monthPicker.value) monthPicker.value = currentMonth();
+  budgetList.replaceChildren();
+  budgetList.hidden = true;
+  updateBudgetNavigation();
+  loadBudgets();
+});
 budgetRefresh.addEventListener("click", loadBudgets);
 budgetList.addEventListener("scroll", updateBudgetNavigation);
 new ResizeObserver(updateBudgetNavigation).observe(budgetList);
 loadBudgets();
+window.addEventListener("pageshow", event => {
+  if (event.persisted) loadBudgets();
+});

@@ -2,6 +2,8 @@ package com.asg.rocketflyiii.firefly.api;
 
 import com.asg.rocketflyiii.config.FireflyProperties;
 import com.asg.rocketflyiii.firefly.dto.FireflyPage;
+import java.time.YearMonth;
+import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.ResourceAccessException;
@@ -82,18 +84,33 @@ public class FireflyClient {
     }
 
     public FireflyPage getAccountsPage(String type, int page) {
-        return getPage(FireflyEndpoints.ACCOUNTS, type, page);
+        return getPage(FireflyEndpoints.ACCOUNTS, Map.of("type", type), page);
     }
 
     public FireflyPage getBudgetsPage(int page) {
-        return getPage(FireflyEndpoints.BUDGETS, null, page);
+        return getPage(FireflyEndpoints.BUDGETS, Map.of(), page);
     }
 
     public FireflyPage getSubscriptionsPage(int page) {
-        return getPage(FireflyEndpoints.BILLS, null, page);
+        return getPage(FireflyEndpoints.BILLS, Map.of(), page);
     }
 
-    private FireflyPage getPage(String endpoint, String type, int page) {
+    public FireflyPage getBudgetTransactions(long id, YearMonth month, int page) {
+        return getBudgetPage(id, "transactions", month, page);
+    }
+
+    public FireflyPage getBudgetLimits(long id, YearMonth month, int page) {
+        return getBudgetPage(id, "limits", month, page);
+    }
+
+    private FireflyPage getBudgetPage(long id, String resource, YearMonth month, int page) {
+        return getPage(
+                FireflyEndpoints.BUDGETS + "/" + id + "/" + resource,
+                Map.of("start", month.atDay(1).toString(), "end", month.atEndOfMonth().toString()),
+                page);
+    }
+
+    private FireflyPage getPage(String endpoint, Map<String, String> parameters, int page) {
         try {
             FireflyPage response =
                     restClient
@@ -101,9 +118,7 @@ public class FireflyClient {
                             .uri(
                                     builder -> {
                                         var uri = builder.path(endpoint);
-                                        if (type != null) {
-                                            uri.queryParam("type", type);
-                                        }
+                                        parameters.forEach(uri::queryParam);
                                         if (page > 1) {
                                             uri.queryParam("page", page);
                                         }
