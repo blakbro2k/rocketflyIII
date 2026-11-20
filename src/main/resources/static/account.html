@@ -23,7 +23,11 @@
     <figure id="balance"></figure>
     <div class="breakdowns"><section><h3>Expenses by category</h3><div id="expenses"></div></section>
     <section><h3>Expenses by budget</h3><div id="budgets"></div></section>
-    <section><h3>Income by category</h3><label><input type="checkbox" id="transfers"> Transfers as Income</label><div id="income"></div></section></div>
+    <section><h3>Income by category</h3><label><input type="checkbox" id="transfers"> Include incoming transfers as income</label><div id="income"></div></section></div>
+    <dl class="transfer-totals">
+      <div><dt>Transfer in</dt><dd id="transfer-in"></dd></div>
+      <div><dt>Transfer out</dt><dd id="transfer-out"></dd></div>
+    </dl>
     <h2>Transactions</h2>
     <p id="transaction-status" role="status"></p>
     <div class="transaction-scroll"><table id="transactions" hidden>

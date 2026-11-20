@@ -132,3 +132,7 @@ details p { color: #466153; padding-inline: .5rem; }
   #balance { overflow-x: auto; }
   #balance svg { min-width: 34rem; }
 }
+
+.transfer-totals { display: flex; flex-wrap: wrap; gap: 1rem 3rem; margin: 1.25rem 0; }
+.transfer-totals dt { font-size: .85rem; }
+.transfer-totals dd { margin: .25rem 0 0; font-weight: 650; font-variant-numeric: tabular-nums; }

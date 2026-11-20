@@ -99,10 +99,26 @@ async function showAccount() {
     const expenses = account.transactions.filter(row => row.type === "withdrawal" && row.amount < 0);
     breakdown("#expenses", expenses, "category", account.currency);
     breakdown("#budgets", expenses, "budget", account.currency);
+    const deposits = account.transactions.filter(row => row.type === "deposit" && row.amount > 0);
+    const transfers = account.transactions.filter(row => row.type === "transfer");
+    const incoming = transfers.filter(row => row.amount > 0);
+    const outgoing = transfers.filter(row => row.amount < 0);
+    const total = rows => rows.reduce((sum, row) => sum + Number(row.amount), 0);
+    const received = total(incoming);
+    document.querySelector("#transfer-in").textContent = money(received, account.currency);
+    document.querySelector("#transfer-out").textContent = money(total(outgoing), account.currency);
+
+    // Keep Firefly category names distinct from the chart's transfer-type slice.
+    const categories = deposits.map(row => ({
+      amount: row.amount,
+      category: /^transfers?(?: in| out)?$/i.test(row.category) ? row.category + " (deposits)" : row.category
+    }));
     try { toggle.checked = sessionStorage.getItem(preference) === "true"; } catch {}
     function income() {
-      breakdown("#income", account.transactions.filter(row => row.amount > 0 &&
-        (row.type === "deposit" || (toggle.checked && row.type === "transfer"))), "category", account.currency);
+      const rows = toggle.checked && received > 0
+        ? [...categories, { category: "Transfer in", amount: received }]
+        : categories;
+      breakdown("#income", rows, "category", account.currency);
     }
     income();
     toggle.onchange = () => {
