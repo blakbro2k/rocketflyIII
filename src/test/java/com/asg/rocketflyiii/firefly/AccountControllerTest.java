@@ -11,7 +11,7 @@ import com.asg.rocketflyiii.config.FireflyProperties;
 import com.asg.rocketflyiii.controllers.AccountController;
 import com.asg.rocketflyiii.firefly.api.FireflyClient;
 import com.asg.rocketflyiii.firefly.services.FireflyAccountService;
-import java.io.IOException;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -24,6 +24,8 @@ import org.springframework.test.web.client.ResponseCreator;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.client.RestClient;
+
+import java.io.IOException;
 
 class AccountControllerTest {
 
@@ -56,6 +58,49 @@ class AccountControllerTest {
         mvc.perform(get("/api/accounts").param("type", type)).andExpect(status().isBadRequest());
     }
 
+    @Test
+    void monthEndBalanceAndAccountSplitsDriveActivity() throws Exception {
+        server.expect(requestTo(BASE + "/api/v1/accounts/7?date=2024-02-29"))
+                .andExpect(method(HttpMethod.GET))
+                .andRespond(
+                        withSuccess(
+                                """
+{"data":{"attributes":{"name":"Checking","currency_code":"USD","current_balance":"110.25"}}}
+""",
+                                MediaType.APPLICATION_JSON));
+        server.expect(
+                        request ->
+                                org.junit.jupiter.api.Assertions.assertEquals(
+                                        "/api/v1/accounts/7/transactions",
+                                        request.getURI().getPath()))
+                .andExpect(method(HttpMethod.GET))
+                .andExpect(
+                        org.springframework.test.web.client.match.MockRestRequestMatchers
+                                .queryParam("start", "2024-02-01"))
+                .andExpect(
+                        org.springframework.test.web.client.match.MockRestRequestMatchers
+                                .queryParam("end", "2024-02-29"))
+                .andRespond(
+                        page(
+                                1,
+                                1,
+                                """
+[{"attributes":{"transactions":[
+  {"date":"2024-02-05","type":"withdrawal","amount":"20.00","currency_code":"USD","source_id":"7","destination_id":"2"},
+  {"date":"2024-02-06","type":"transfer","amount":"25","currency_code":"EUR","foreign_amount":"30.25","foreign_currency_code":"USD","source_id":"2","destination_id":"7"},
+  {"date":"2024-02-06","source_id":"1","destination_id":"2"}
+]}}]
+"""));
+        mvc.perform(get("/api/accounts/7/activity").param("month", "2024-02"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.dailyBalances.length()").value(29))
+                .andExpect(jsonPath("$.dailyBalances[0]").value(100.00))
+                .andExpect(jsonPath("$.dailyBalances[4]").value(80.00))
+                .andExpect(jsonPath("$.transactions.length()").value(2))
+                .andExpect(jsonPath("$.transactions[0].amount").value(30.25))
+                .andExpect(jsonPath("$.transactions[1].balance").value(80.00));
+    }
+
     @AfterEach
     void verifyRequests() {
         server.verify();
@@ -71,8 +116,8 @@ class AccountControllerTest {
     private ResponseCreator page(int number, int pages, String data) {
         return withSuccess(
                 """
-                {"data":%s,"meta":{"pagination":{"total":2,"count":1,"per_page":1,"current_page":%d,"total_pages":%d}}}
-                """
+{"data":%s,"meta":{"pagination":{"total":2,"count":1,"per_page":1,"current_page":%d,"total_pages":%d}}}
+"""
                         .formatted(data, number, pages),
                 MediaType.APPLICATION_JSON);
     }

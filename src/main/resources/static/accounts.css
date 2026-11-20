@@ -112,3 +112,23 @@ details p { color: #466153; padding-inline: .5rem; }
 .pace-track > div { height: 100%; border-radius: inherit; background: #bd3838; }
 .pace-today { position: absolute; top: -.2rem; height: 1.4rem; border-right: 2px solid #18382e; transform: translateX(-100%); padding-top: 1.4rem; font-size: .8rem; }
 @media (max-width: 38rem) { .budget-plots { grid-template-columns: 1fr; } }
+
+.account-detail { width: min(96%, 80rem); }
+.account-detail h2 { margin: 1.5rem 0 .75rem; font-size: 1.5rem; }
+.account-detail h1 { margin-top: 1rem; }
+#groups a, .account-detail a { color: #225943; }
+#balance { margin: 0; }
+#balance svg { display: block; width: 100%; max-height: 20rem; }
+#balance text { fill: #344c40; font: 13px system-ui, sans-serif; }
+.breakdowns { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
+.breakdowns section { padding: 1rem; border: 1px solid #d7dfd8; border-radius: .6rem; }
+.breakdowns h3 { margin: 0 0 .7rem; }
+.breakdowns ul { list-style: none; padding: 0; font-size: .85rem; }
+.breakdowns li { margin-block: .3rem; overflow-wrap: anywhere; }
+.breakdowns li::before { content: ""; display: inline-block; background: var(--slice); width: .7rem; height: .7rem; margin-right: .4rem; }
+.account-pie { width: min(75%, 10rem); aspect-ratio: 1; border-radius: 50%; margin: 1rem auto; }
+@media (max-width: 45rem) {
+  .breakdowns { grid-template-columns: 1fr; }
+  #balance { overflow-x: auto; }
+  #balance svg { min-width: 34rem; }
+}
