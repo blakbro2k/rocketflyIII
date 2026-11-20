@@ -131,12 +131,17 @@ public class FireflyClient {
     }
 
     public JsonNode getDatedAccount(long id, LocalDate date) {
-        JsonNode response =
-                read(
-                        FireflyEndpoints.ACCOUNTS + "/" + id,
-                        Map.of("date", date.toString()),
-                        1,
-                        JsonNode.class);
+        return getAttributes(FireflyEndpoints.ACCOUNTS + "/" + id, Map.of("date", date.toString()));
+    }
+
+    public JsonNode getSubscription(long id, YearMonth month) {
+        return getAttributes(
+                FireflyEndpoints.BILLS + "/" + id,
+                Map.of("start", month.atDay(1).toString(), "end", month.atEndOfMonth().toString()));
+    }
+
+    private JsonNode getAttributes(String endpoint, Map<String, String> parameters) {
+        JsonNode response = read(endpoint, parameters, 1, JsonNode.class);
         if (response == null || !response.path("data").path("attributes").isObject())
             throw invalidResponse();
         return response.path("data").path("attributes");

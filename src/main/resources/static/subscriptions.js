@@ -1,3 +1,5 @@
+import { monthPicker } from "./settings.js";
+
 const subscriptionTable = document.querySelector("#subscription-table");
 const subscriptionStatus = document.querySelector("#subscription-status");
 const subscriptionRefresh = document.querySelector("#subscription-refresh");
@@ -12,12 +14,15 @@ async function loadSubscriptions() {
     if (!Array.isArray(subscriptions)) throw new Error("Invalid subscription list");
 
     const rows = document.createElement("tbody");
-    for (const { attributes } of subscriptions) {
+    for (const { id, attributes } of subscriptions) {
       if (typeof attributes.name !== "string" || typeof attributes.active !== "boolean") {
         throw new Error("Invalid subscription");
       }
       const row = rows.insertRow();
-      row.insertCell().textContent = attributes.name;
+      const link = document.createElement("a");
+      link.href = "subscription.html?" + new URLSearchParams({ id, month: monthPicker.value });
+      link.textContent = attributes.name;
+      row.insertCell().append(link);
       row.insertCell().textContent = attributes.active ? "Active" : "Inactive";
     }
     subscriptionTable.tBodies[0].replaceWith(rows);
