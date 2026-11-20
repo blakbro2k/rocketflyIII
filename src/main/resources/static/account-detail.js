@@ -65,24 +65,31 @@ function breakdown(selector, rows, key, currency) {
     target.textContent = "No activity this month.";
     return;
   }
+  renderPie(target, entries, currency);
+}
+
+function renderPie(target, entries, currency, groupIncoming = false) {
+  target.replaceChildren();
   const total = entries.reduce((sum, [, amount]) => sum + amount, 0);
   const legend = document.createElement("ul");
   const slices = [];
   let start = 0;
   entries.forEach(([label, amount], index) => {
     const color = colors[index] || "hsl(" + (index * 137.5 % 360) + " 42% 43%)";
-    const end = start + amount / total * 100;
-    slices.push(color + " " + start + "% " + end + "%");
+    const end = total ? start + amount / total * 100 : 0;
+    const sliceColor = groupIncoming && label === "Transfer (in)" ? colors[1] : color;
+    slices.push(sliceColor + " " + start + "% " + end + "%");
     start = end;
     const item = document.createElement("li");
-    item.style.setProperty("--slice", color);
+    item.style.setProperty("--slice", sliceColor);
     item.textContent = label + " · " + money(amount, currency);
+    if (groupIncoming && label === "Transfer (in)") item.append(" (shown with Earned)");
     legend.append(item);
   });
   const pie = document.createElement("div");
   pie.className = "account-pie";
   pie.setAttribute("aria-hidden", "true");
-  pie.style.background = "conic-gradient(" + slices.join(",") + ")";
+  pie.style.background = total ? "conic-gradient(" + slices.join(",") + ")" : "#d7dfd8";
   target.append(pie, legend);
 }
 
@@ -108,22 +115,20 @@ async function showAccount() {
     document.querySelector("#transfer-in").textContent = money(received, account.currency);
     document.querySelector("#transfer-out").textContent = money(total(outgoing), account.currency);
 
-    // Keep Firefly category names distinct from the chart's transfer-type slice.
-    const categories = deposits.map(row => ({
-      amount: row.amount,
-      category: /^transfers?(?: in| out)?$/i.test(row.category) ? row.category + " (deposits)" : row.category
-    }));
+    const activityTotals = [
+      ["Spent", Math.abs(total(expenses))],
+      ["Earned", total(deposits)],
+      ["Transfer (in)", received],
+      ["Transfer (out)", Math.abs(total(outgoing))]
+    ];
     try { toggle.checked = sessionStorage.getItem(preference) === "true"; } catch {}
-    function income() {
-      const rows = toggle.checked && received > 0
-        ? [...categories, { category: "Transfer in", amount: received }]
-        : categories;
-      breakdown("#income", rows, "category", account.currency);
+    function drawActivity() {
+      renderPie(document.querySelector("#activity-pie"), activityTotals, account.currency, toggle.checked);
     }
-    income();
+    drawActivity();
     toggle.onchange = () => {
       try { sessionStorage.setItem(preference, String(toggle.checked)); } catch {}
-      income();
+      drawActivity();
     };
     const table = document.querySelector("#transactions");
     for (const row of account.transactions) {
