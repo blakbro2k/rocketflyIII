@@ -112,8 +112,6 @@ async function showAccount() {
     const outgoing = transfers.filter(row => row.amount < 0);
     const total = rows => rows.reduce((sum, row) => sum + Number(row.amount), 0);
     const received = total(incoming);
-    document.querySelector("#transfer-in").textContent = money(received, account.currency);
-    document.querySelector("#transfer-out").textContent = money(total(outgoing), account.currency);
 
     const activityTotals = [
       ["Spent", Math.abs(total(expenses))],
@@ -134,7 +132,7 @@ async function showAccount() {
     for (const row of account.transactions) {
       const tr = table.tBodies[0].insertRow();
       for (const value of [row.description, money(row.amount, account.currency), money(row.balance, account.currency),
-        row.date, row.source, row.destination, row.category, row.budget]) tr.insertCell().textContent = value || "—";
+        row.date, row.category, row.budget]) tr.insertCell().textContent = value || "—";
     }
     table.hidden = !account.transactions.length;
     if (table.hidden) document.querySelector("#transaction-status").textContent = "No transactions this month.";
