@@ -1,4 +1,4 @@
-import { loadActivity, renderChart, transferToggle } from "./budget-chart.js";
+import { loadActivity, renderChart } from "./budget-chart.js";
 const budgetList = document.querySelector("#budget-list");
 const budgetStatus = document.querySelector("#budget-status");
 const budgetRefresh = document.querySelector("#budget-refresh");
@@ -39,21 +39,16 @@ async function loadBudgets() {
       }
       const card = document.createElement("li");
       const name = document.createElement("strong");
-      const status = document.createElement("span");
       name.textContent = attributes.name;
-      status.textContent = attributes.active ? "Active" : "Inactive";
       const link = document.createElement("a");
       link.className = "budget-link";
       link.href = "budget.html?" + new URLSearchParams({ id, month });
       link.append(name);
       const chart = document.createElement("div");
       chart.textContent = "Loading chart…";
-      const toggle = transferToggle(id);
-      card.append(link, status, chart, toggle.label);
+      card.append(link, chart);
       loadActivity(id, month).then(activity => {
-        const draw = () => renderChart(chart, activity, toggle.input.checked);
-        draw();
-        toggle.input.addEventListener("change", draw);
+        renderChart(chart, activity, { compact: true });
       }).catch(() => { chart.textContent = "Chart unavailable."; });
       cards.append(card);
     }

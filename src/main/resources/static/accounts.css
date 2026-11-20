@@ -78,7 +78,6 @@ details p { color: #466153; padding-inline: .5rem; }
 #budget-list li { position: relative; }
 .budget-link { color: inherit; text-decoration: underline; text-underline-offset: .18em; }
 .budget-link::after { content: ""; position: absolute; inset: 0; border-radius: .55rem; }
-.transfer-toggle { position: relative; display: inline-flex; align-items: center; gap: .3rem; cursor: pointer; }
 .budget-figure { margin: .8rem 0; display: grid; gap: .6rem; font-size: .9rem; }
 .budget-figure figcaption { display: grid; gap: .2rem; }
 .budget-pie { width: 4.5rem; aspect-ratio: 1; border-radius: 50%; background: #d6d9d7; }
@@ -101,3 +100,6 @@ details p { color: #466153; padding-inline: .5rem; }
 .transaction-scroll { overflow-x: auto; }
 #transactions { min-width: 55rem; }
 #transactions td, #transactions th { text-align: left; }
+#budget-list li { text-align: center; }
+#budget-list .budget-figure { justify-items: center; margin-bottom: 0; }
+#budget-list .budget-pie { width: min(9rem, 100%); }

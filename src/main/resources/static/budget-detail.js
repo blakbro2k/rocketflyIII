@@ -1,4 +1,4 @@
-import { loadActivity, money, renderChart, transferToggle } from "./budget-chart.js";
+import { loadActivity, money, renderChart } from "./budget-chart.js";
 
 const params = new URLSearchParams(location.search);
 const id = params.get("id");
@@ -16,14 +16,10 @@ async function showBudget() {
   }
   document.querySelector("#name").textContent = "Budget " + id;
   document.querySelector("#period").textContent = new Intl.DateTimeFormat(undefined, { month: "long", year: "numeric" }).format(new Date(month + "-01T12:00:00"));
-  const toggle = transferToggle(id);
-  document.querySelector("#preference").append(toggle.label);
   try {
     const activity = await loadActivity(id, month);
-    const draw = () => renderChart(chart, activity, toggle.input.checked);
-    draw();
+    renderChart(chart, activity);
     renderProgress(document.querySelector("#progress"), activity, month);
-    toggle.input.addEventListener("change", draw);
     const table = document.querySelector("#transactions");
     for (const entry of activity.transactions) {
       const row = table.tBodies[0].insertRow();
