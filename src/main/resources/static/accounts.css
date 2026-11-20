@@ -33,7 +33,7 @@ button {
 }
 button:hover { background: #eaf1e9; }
 summary:focus-visible, button:focus-visible { outline: 3px solid #257357; outline-offset: 3px; }
-#status, #budget-status { margin: .65rem 0 1.8rem; color: #466153; }
+#status, #budget-status, #subscription-status { margin: .65rem 0 1.8rem; color: #466153; }
 table { width: 100%; border-collapse: collapse; background: white; }
 th, td { text-align: left; padding: .9rem clamp(.6rem, 2vw, 1.4rem); border-bottom: 1px solid #d7dfd8; overflow-wrap: anywhere; }
 thead th { background: #e7efe6; font-size: .85rem; }
@@ -69,3 +69,7 @@ details p { color: #466153; padding-inline: .5rem; }
 #budget-list span { color: #466153; font-size: .9rem; }
 #budget-navigation { margin-top: .65rem; text-align: right; }
 #budget-navigation button:disabled { opacity: .5; cursor: default; }
+
+@media (max-width: 32rem) {
+  .heading { flex-wrap: wrap; }
+}

@@ -89,6 +89,10 @@ public class FireflyClient {
         return getPage(FireflyEndpoints.BUDGETS, null, page);
     }
 
+    public FireflyPage getSubscriptionsPage(int page) {
+        return getPage(FireflyEndpoints.BILLS, null, page);
+    }
+
     private FireflyPage getPage(String endpoint, String type, int page) {
         try {
             FireflyPage response =
