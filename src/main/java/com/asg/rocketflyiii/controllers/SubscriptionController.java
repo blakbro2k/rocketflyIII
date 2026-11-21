@@ -37,7 +37,10 @@ public class SubscriptionController {
     }
 
     public record Summary(
-            JsonNode bill, BigDecimal annualAverage, BigDecimal overallAverage, List<String> rules) {}
+            JsonNode bill,
+            BigDecimal annualAverage,
+            BigDecimal overallAverage,
+            List<String> rules) {}
 
     @GetMapping("/api/subscriptions/{id}/summary")
     public Summary summary(
@@ -50,7 +53,8 @@ public class SubscriptionController {
         BigDecimal overall = BigDecimal.ZERO;
         int annualCount = 0;
         int count = 0;
-        for (var group : FireflyPage.collect(page -> client.getSubscriptionTransactions(id, page))) {
+        for (var group :
+                FireflyPage.collect(page -> client.getSubscriptionTransactions(id, page))) {
             for (var split : group.path("attributes").path("transactions")) {
                 if (!Long.toString(id).equals(split.path("bill_id").asString(""))) continue;
                 String field;

@@ -11,7 +11,7 @@ import com.asg.rocketflyiii.config.FireflyProperties;
 import com.asg.rocketflyiii.controllers.AccountController;
 import com.asg.rocketflyiii.firefly.api.FireflyClient;
 import com.asg.rocketflyiii.firefly.services.FireflyAccountService;
-
+import java.io.IOException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -24,8 +24,6 @@ import org.springframework.test.web.client.ResponseCreator;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.client.RestClient;
-
-import java.io.IOException;
 
 class AccountControllerTest {
 
