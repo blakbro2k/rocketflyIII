@@ -1,7 +1,9 @@
 package com.asg.rocketflyiii.firefly;
 
+import static org.hamcrest.Matchers.startsWith;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.header;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.queryParam;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -47,6 +49,49 @@ class SubscriptionControllerTest {
                 """
                         .formatted(data, current, last),
                 MediaType.APPLICATION_JSON);
+    }
+
+    @Test
+    void requestsSubscriptionForSelectedMonth() throws Exception {
+        server.expect(requestTo(startsWith("https://firefly.test/api/v1/bills/7?")))
+                .andExpect(method(HttpMethod.GET))
+                .andExpect(queryParam("start", "2024-02-01"))
+                .andExpect(queryParam("end", "2024-02-29"))
+                .andRespond(
+                        withSuccess(
+                                "{\"data\":{\"attributes\":{\"name\":\"Music\",\"paid_dates\":[]}}}",
+                                MediaType.APPLICATION_JSON));
+        mvc.perform(get("/api/subscriptions/7").param("month", "2024-02"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("Music"))
+                .andExpect(jsonPath("$.paid_dates").isArray());
+    }
+
+    @Test
+    void summarizesLinkedPaymentsAcrossYearsAndListsRules() throws Exception {
+        server.expect(requestTo(startsWith("https://firefly.test/api/v1/bills/7?")))
+                .andRespond(
+                        withSuccess(
+                                "{\"data\":{\"attributes\":{\"currency_code\":\"USD\"}}}",
+                                MediaType.APPLICATION_JSON));
+        expectPage(
+                "/7/transactions",
+                page(
+                        """
+                        [{"attributes":{"transactions":[
+                          {"bill_id":"7","date":"2024-02-03","currency_code":"USD","amount":"12"},
+                          {"bill_id":"7","date":"2023-12-03","currency_code":"USD","amount":"8"},
+                          {"bill_id":"9","date":"2024-02-03","currency_code":"USD","amount":"100"}
+                        ]}}]
+                        """,
+                        1,
+                        1));
+        expectPage("/7/rules", page("[{\"attributes\":{\"title\":\"Music rule\"}}]", 1, 1));
+        mvc.perform(get("/api/subscriptions/7/summary").param("month", "2024-02"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.annualAverage").value(-12))
+                .andExpect(jsonPath("$.overallAverage").value(-10))
+                .andExpect(jsonPath("$.rules[0]").value("Music rule"));
     }
 
     @AfterEach
