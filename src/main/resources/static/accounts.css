@@ -99,10 +99,11 @@ details p { color: #466153; padding-inline: .5rem; }
 #budget-list .budget-figure { justify-items: center; margin-bottom: 0; }
 #budget-list .budget-pie { width: min(9rem, 100%); }
 
-.budget-plots { display: grid; grid-template-columns: minmax(14rem, 2fr) minmax(0, 3fr); gap: 1rem 2rem; align-items: center; }
+.budget-plots { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1rem; }
+.budget-plots .budget-figure { justify-items: center; text-align: center; }
 .progress-chart, .budget-pace { margin: 0; font-size: .9rem; }
 .progress-chart figcaption, .budget-pace figcaption { font-weight: 650; margin-bottom: .6rem; }
-.progress-chart { width: 100%; max-width: 33rem; }
+.progress-chart { width: 100%; max-width: 33rem; margin-inline: auto; }
 .progress-chart svg { display: block; width: 100%; }
 .progress-chart polyline { fill: none; stroke: #ac3434; stroke-width: 3; vector-effect: non-scaling-stroke; }
 .progress-chart line { stroke: #c1cfc5; stroke-width: 1; vector-effect: non-scaling-stroke; }
@@ -111,7 +112,6 @@ details p { color: #466153; padding-inline: .5rem; }
 .pace-track { height: 1rem; position: relative; border-radius: .4rem; background: #419260; }
 .pace-track > div { height: 100%; border-radius: inherit; background: #bd3838; }
 .pace-today { position: absolute; top: -.2rem; height: 1.4rem; border-right: 2px solid #18382e; transform: translateX(-100%); padding-top: 1.4rem; font-size: .8rem; }
-@media (max-width: 38rem) { .budget-plots { grid-template-columns: 1fr; } }
 
 .account-detail { width: min(96%, 80rem); }
 .account-detail h2 { margin: 1.5rem 0 .75rem; font-size: 1.5rem; }
