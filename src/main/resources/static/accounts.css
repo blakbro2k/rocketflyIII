@@ -136,3 +136,10 @@ details p { color: #466153; padding-inline: .5rem; }
 #subscription-table { min-width: 49rem; table-layout: auto; }
 #summary caption { text-align: left; padding-block: 1rem; }
 #summary td { white-space: pre-line; }
+
+.access-page form, .access-page label { display: grid; gap: .35rem; }
+.access-page form { max-width: 32rem; gap: .85rem; margin-block: 1rem; }
+.access-page input, .access-page select { font: inherit; padding: .45rem; }
+.access-page label:has(input[type="checkbox"]) { display: block; }
+.access-page [hidden] { display: none; }
+#settings nav { margin-top: 1rem; }

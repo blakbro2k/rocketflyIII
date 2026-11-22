@@ -10,6 +10,7 @@ async function loadSubscriptions() {
   subscriptionStatus.textContent = "Loading subscriptions from Firefly III…";
   try {
     const response = await fetch("/api/subscriptions?month=" + monthPicker.value, { cache: "no-store" });
+    if (response.status === 403) { subscriptionTable.closest("section").hidden = true; return; }
     if (!response.ok) throw new Error("Subscription request failed");
     const subscriptions = await response.json();
     if (!Array.isArray(subscriptions)) throw new Error("Invalid subscription list");

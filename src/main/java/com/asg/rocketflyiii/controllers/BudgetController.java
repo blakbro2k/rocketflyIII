@@ -1,5 +1,6 @@
 package com.asg.rocketflyiii.controllers;
 
+import com.asg.rocketflyiii.access.WebAccess.Scope;
 import com.asg.rocketflyiii.firefly.api.FireflyClient;
 import com.asg.rocketflyiii.firefly.dto.BudgetActivity;
 import com.asg.rocketflyiii.firefly.dto.FireflyPage;
@@ -8,6 +9,7 @@ import java.util.List;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import tools.jackson.databind.JsonNode;
@@ -21,8 +23,8 @@ public class BudgetController {
     }
 
     @GetMapping("/api/budgets")
-    public List<JsonNode> getBudgets() {
-        return FireflyPage.collect(client::getBudgetsPage);
+    public List<JsonNode> getBudgets(@RequestAttribute Scope scope) {
+        return scope.visible("budget", FireflyPage.collect(client::getBudgetsPage));
     }
 
     @GetMapping("/api/budgets/{id}/activity")
