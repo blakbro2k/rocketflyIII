@@ -2,7 +2,9 @@ package com.asg.rocketflyiii.firefly.api;
 
 import com.asg.rocketflyiii.config.FireflyProperties;
 import com.asg.rocketflyiii.firefly.dto.FireflyPage;
-
+import java.time.LocalDate;
+import java.time.YearMonth;
+import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.ResourceAccessException;
@@ -10,13 +12,8 @@ import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.server.ResponseStatusException;
-
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
-
-import java.time.LocalDate;
-import java.time.YearMonth;
-import java.util.Map;
 
 @Component
 public class FireflyClient {
@@ -100,6 +97,21 @@ public class FireflyClient {
         return getPage(FireflyEndpoints.BILLS, Map.of(), page);
     }
 
+    public FireflyPage getSubscriptionsPage(YearMonth month, int page) {
+        return getPage(
+                FireflyEndpoints.BILLS,
+                Map.of("start", month.atDay(1).toString(), "end", month.atEndOfMonth().toString()),
+                page);
+    }
+
+    public FireflyPage getSubscriptionTransactions(long id, int page) {
+        return getPage(FireflyEndpoints.BILLS + "/" + id + "/transactions", Map.of(), page);
+    }
+
+    public FireflyPage getSubscriptionRules(long id, int page) {
+        return getPage(FireflyEndpoints.BILLS + "/" + id + "/rules", Map.of(), page);
+    }
+
     public FireflyPage getBudgetTransactions(long id, YearMonth month, int page) {
         return getBudgetPage(id, "transactions", month, page);
     }
@@ -131,12 +143,17 @@ public class FireflyClient {
     }
 
     public JsonNode getDatedAccount(long id, LocalDate date) {
-        JsonNode response =
-                read(
-                        FireflyEndpoints.ACCOUNTS + "/" + id,
-                        Map.of("date", date.toString()),
-                        1,
-                        JsonNode.class);
+        return getAttributes(FireflyEndpoints.ACCOUNTS + "/" + id, Map.of("date", date.toString()));
+    }
+
+    public JsonNode getSubscription(long id, YearMonth month) {
+        return getAttributes(
+                FireflyEndpoints.BILLS + "/" + id,
+                Map.of("start", month.atDay(1).toString(), "end", month.atEndOfMonth().toString()));
+    }
+
+    private JsonNode getAttributes(String endpoint, Map<String, String> parameters) {
+        JsonNode response = read(endpoint, parameters, 1, JsonNode.class);
         if (response == null || !response.path("data").path("attributes").isObject())
             throw invalidResponse();
         return response.path("data").path("attributes");

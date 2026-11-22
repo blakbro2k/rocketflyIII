@@ -132,3 +132,7 @@ details p { color: #466153; padding-inline: .5rem; }
   #balance { overflow-x: auto; }
   #balance svg { min-width: 34rem; }
 }
+
+#subscription-table { min-width: 49rem; table-layout: auto; }
+#summary caption { text-align: left; padding-block: 1rem; }
+#summary td { white-space: pre-line; }
