@@ -11,7 +11,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class AccessStore implements UserDetailsService {
-    public record Profile(String username, long roleId, String roleName, long version) {
+    public record Profile(String username, long roleId, String roleName, long version, boolean active) {
         public boolean admin() {
             return roleId == 1;
         }
@@ -42,6 +42,7 @@ public class AccessStore implements UserDetailsService {
                 .query(
                         (r, n) ->
                                 User.withUsername(r.getString("username"))
+                                        .disabled(!r.getBoolean("active"))
                                         .password(r.getString("password_hash"))
                                         .authorities("version:" + r.getLong("credential_version"))
                                         .build())
@@ -55,17 +56,18 @@ public class AccessStore implements UserDetailsService {
 
     public List<Profile> profiles() {
         return db.sql(
-                        "select p.username, p.role_id, r.name role_name, p.credential_version version from rf_profile p join rf_role r on r.id=p.role_id order by p.username")
+                        "select p.username, p.role_id, r.name role_name, p.credential_version version, p.active from rf_profile p join rf_role r on r.id=p.role_id order by p.username")
                 .query(Profile.class)
                 .list();
     }
 
     public Profile profile(String username) {
         return db.sql(
-                        "select p.username, p.role_id, r.name role_name, p.credential_version version from rf_profile p join rf_role r on r.id=p.role_id where p.username=?")
+                        "select p.username, p.role_id, r.name role_name, p.credential_version version, p.active from rf_profile p join rf_role r on r.id=p.role_id where p.username=?")
                 .param(username)
                 .query(Profile.class)
-                .single();
+                .optional()
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
 
     public List<Grant> grants(long role) {
@@ -101,15 +103,24 @@ public class AccessStore implements UserDetailsService {
 
     @Transactional
     public void assign(String username, long role) {
+        updateProfile(username, role, null);
+    }
+
+    @Transactional
+    public void updateProfile(String username, long role, Boolean active) {
         lockAdmin();
         var user = profile(username);
+        boolean enabled = active == null ? user.active() : active;
         if (user.admin()
-                && role != 1
-                && db.sql("select count(*) from rf_profile where role_id=1")
+                && user.active()
+                && (role != 1 || !enabled)
+                && db.sql("select count(*) from rf_profile where role_id=1 and active=true")
                                 .query(Long.class)
                                 .single()
                         == 1) throw bad("Keep at least one System Admin.");
-        db.sql("update rf_profile set role_id=? where username=?").params(role, username).update();
+        db.sql("update rf_profile set role_id=?, active=?, credential_version=credential_version+? where username=?")
+                .params(role, enabled, enabled == user.active() ? 0 : 1, username)
+                .update();
     }
 
     private void lockAdmin() {

@@ -74,6 +74,14 @@ public class AccessController {
         store.assign(name, a.roleId());
     }
 
+    public record ProfileEdit(long roleId, Boolean active) {}
+
+    @PutMapping("/api/admin/profiles/{name}")
+    public void updateProfile(@PathVariable String name, @RequestBody ProfileEdit edit) {
+        if (edit.active() == null) throw AccessStore.bad("Choose a profile status.");
+        store.updateProfile(name, edit.roleId(), edit.active());
+    }
+
     @GetMapping("/api/admin/roles")
     public List<AccessStore.Role> roles() {
         return store.roles();

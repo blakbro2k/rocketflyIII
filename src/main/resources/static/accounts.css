@@ -143,3 +143,10 @@ details p { color: #466153; padding-inline: .5rem; }
 .access-page label:has(input[type="checkbox"]) { display: block; }
 .access-page [hidden] { display: none; }
 #settings nav { margin-top: 1rem; }
+
+#profiles form { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto; align-items: end; }
+#profiles strong { grid-column: 1 / -1; overflow-wrap: anywhere; }
+#profiles select, #add input, #add select { width: 100%; min-width: 0; }
+@media (max-width: 36rem) {
+  #profiles form { grid-template-columns: 1fr; }
+}

@@ -178,6 +178,24 @@ class ProfileAccessTest {
                 .andExpect(status().isConflict());
         mvc.perform(delete("/api/admin/roles/" + role.id()).session(admin))
                 .andExpect(status().isForbidden());
+        String path = "/api/admin/profiles/family";
+        String inactive = json.writeValueAsString(Map.of("roleId", role.id(), "active", false));
+        mvc.perform(withToken(put(path).contentType("application/json").content(inactive), family))
+                .andExpect(status().isForbidden());
+        mvc.perform(withToken(put(path).contentType("application/json").content(inactive), admin))
+                .andExpect(status().isOk());
+        mvc.perform(get("/api/me").session(family)).andExpect(status().isUnauthorized());
+        mvc.perform(withToken(post("/login").param("username", "family").param("password", PASSWORD),
+                        new MockHttpSession()))
+                .andExpect(redirectedUrl("/login?error"));
+        mvc.perform(withToken(put("/api/admin/profiles/owner").contentType("application/json")
+                        .content(inactive), admin))
+                .andExpect(status().isBadRequest());
+        String active = json.writeValueAsString(Map.of("roleId", role.id(), "active", true));
+        mvc.perform(withToken(put(path).contentType("application/json").content(active), admin))
+                .andExpect(status().isOk());
+        mvc.perform(get("/api/me").session(login("family", PASSWORD)))
+                .andExpect(jsonPath("$.active").value(true));
         Files.writeString(directory.resolve("setup-token"), "recovery-token");
         claim("recovery-token", "replacement-password", 200);
         mvc.perform(get("/api/admin/profiles").session(admin)).andExpect(status().isUnauthorized());

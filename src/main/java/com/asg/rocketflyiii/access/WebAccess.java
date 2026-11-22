@@ -89,7 +89,7 @@ public class WebAccess implements WebMvcConfigurer, HandlerInterceptor {
             return false;
         }
         var profile = store.profile(auth.getName());
-        if (auth.getAuthorities().stream()
+        if (!profile.active() || auth.getAuthorities().stream()
                 .noneMatch(a -> a.getAuthority().equals("version:" + profile.version()))) {
             req.getSession().invalidate();
             res.sendError(401);
