@@ -142,7 +142,7 @@ details p { color: #466153; padding-inline: .5rem; }
 .access-page input, .access-page select { font: inherit; padding: .45rem; }
 .access-page label:has(input[type="checkbox"]) { display: block; }
 .access-page [hidden] { display: none; }
-#settings nav { margin-top: 1rem; }
+#settings nav { display: grid; justify-items: start; gap: .5rem; margin-top: 1rem; }
 
 #profiles form { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto; align-items: end; }
 #profiles strong { grid-column: 1 / -1; overflow-wrap: anywhere; }

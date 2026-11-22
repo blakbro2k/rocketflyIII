@@ -101,6 +101,9 @@ class ProfileAccessTest {
         claim("wrong", PASSWORD, 403);
         claim("first-token", PASSWORD, 200);
         claim("first-token", PASSWORD, 403);
+        mvc.perform(get("/login").servletPath("/login"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("name=\"password\"")));
         var admin = login("owner", PASSWORD);
         mvc.perform(get("/api/admin/profiles").session(admin)).andExpect(status().isOk());
         var familyInput =

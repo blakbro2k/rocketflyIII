@@ -54,7 +54,7 @@ public class WebAccess implements WebMvcConfigurer, HandlerInterceptor {
                                                                         ? "/setup.html"
                                                                         : "/login"));
                                         }))
-                .formLogin(f -> f.defaultSuccessUrl("/", true).permitAll())
+                .formLogin(f -> f.loginPage("/login").defaultSuccessUrl("/", true).permitAll())
                 .logout(l -> l.logoutSuccessUrl("/login"))
                 .build();
     }
