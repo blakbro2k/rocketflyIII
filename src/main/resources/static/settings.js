@@ -16,3 +16,23 @@ monthPicker.addEventListener("change", () => {
   url.searchParams.set("month", monthPicker.value);
   location.replace(url);
 });
+
+import { api } from "./access-ui.js";
+const links = document.createElement("nav");
+const profiles = document.createElement("a");
+profiles.href = "/profiles.html";
+profiles.textContent = "Profiles";
+links.append(profiles);
+drawer.append(links);
+api("/api/me").then(me => {
+  if (me.roleId === 1) {
+    const roles = document.createElement("a");
+    roles.href = "/roles.html";
+    roles.textContent = "Roles";
+    links.append(" · ", roles);
+  }
+  const logout = document.createElement("a");
+  logout.href = "/logout";
+  logout.textContent = "Sign out";
+  links.append(" · ", logout);
+}).catch(() => {});

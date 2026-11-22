@@ -35,6 +35,11 @@ class AccountControllerTest {
     private final MockMvc mvc =
             MockMvcBuilders.standaloneSetup(
                             new AccountController(new FireflyAccountService(client)))
+                    .defaultRequest(
+                            get("/").requestAttr(
+                                            "scope",
+                                            new com.asg.rocketflyiii.access.WebAccess.Scope(
+                                                    true, java.util.Set.of())))
                     .build();
 
     @ParameterizedTest

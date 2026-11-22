@@ -32,6 +32,11 @@ class BudgetControllerTest {
                                             builder,
                                             new FireflyProperties(
                                                     "https://firefly.test", "test-token"))))
+                    .defaultRequest(
+                            get("/").requestAttr(
+                                            "scope",
+                                            new com.asg.rocketflyiii.access.WebAccess.Scope(
+                                                    true, java.util.Set.of())))
                     .build();
 
     private void expectPage(String query, ResponseCreator response) {

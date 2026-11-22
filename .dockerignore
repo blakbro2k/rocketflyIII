@@ -1,0 +1,10 @@
+*
+!pom.xml
+!mvnw
+!.mvn
+!.mvn/**
+!src
+!src/**
+!scripts
+!scripts/SetupToken.java
+**/application-local.properties

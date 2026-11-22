@@ -82,3 +82,11 @@ The post-MVP roadmap will be developed separately, including recurring analysis,
 ## License
 
 To be determined.
+
+### Local profiles and roles
+
+Start RocketFlyIII with the existing Firefly environment variables. In IntelliJ, use the project root as the working directory. Run `java scripts/SetupToken.java` from that same directory, open `http://localhost:8080/setup.html`, and enter the one-time token, a named admin username, and a new password. Then sign in at `/login`. The local profile database is stored in `rocketfly-data`. Set `ROCKETFLY_DATA_DIR` for both the app and command to use another private directory.
+
+For Docker, run `docker compose up --build -d`, then `docker compose exec rocketflyiii java /app/SetupToken.java`. The Compose volume preserves users and grants across restarts. Use the same command for recovery, enter an existing System Admin username at `/setup.html`, and choose a new password. Generating a token replaces any previous token. A token expires after 15 minutes and is consumed on use. Keep access to the data directory and Docker restricted to installation operators. For remote deployment, serve the app through an HTTPS reverse proxy.
+
+Use **Settings → Roles** to create a role and select its accounts and budgets. **Refresh from Firefly III** reloads the choices. Use **Settings → Profiles** to create a login and assign a role. A budget grant includes its matched transactions, while opening account history requires an account grant. Subscriptions are available to System Admins. Reassign profiles before deleting their role.
