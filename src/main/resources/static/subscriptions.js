@@ -16,7 +16,7 @@ async function loadSubscriptions() {
 
     const rows = document.createElement("tbody");
     for (const { id, attributes } of subscriptions) {
-      if (typeof attributes.name !== "string" || typeof attributes.active !== "boolean") {
+      if (typeof attributes.name !== "string") {
         throw new Error("Invalid subscription");
       }
       const row = rows.insertRow();
@@ -24,7 +24,6 @@ async function loadSubscriptions() {
       link.href = "subscription.html?" + new URLSearchParams({ id, month: monthPicker.value });
       link.textContent = attributes.name;
       row.insertCell().append(link);
-      row.insertCell().textContent = attributes.active ? "Active" : "Inactive";
       const price = amount(attributes.amount_avg, attributes.currency_code);
       row.insertCell().textContent = price !== "—" && Number(attributes.amount_min) !== Number(attributes.amount_max) ? "≈ " + price : price;
       row.insertCell().textContent = paymentStatus(attributes, monthPicker.value);
