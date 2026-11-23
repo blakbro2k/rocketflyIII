@@ -64,6 +64,11 @@ public class WebAccess implements WebMvcConfigurer, HandlerInterceptor {
             return admin || grants.contains(new AccessStore.Grant(kind, id));
         }
 
+        public String visibleName(JsonNode split, String field, String kind) {
+            if (!allows(kind, split.path(field + "_id").asText(""))) return null;
+            return split.path(field + "_name").asText(null);
+        }
+
         public List<JsonNode> visible(String kind, List<JsonNode> items) {
             return admin
                     ? items

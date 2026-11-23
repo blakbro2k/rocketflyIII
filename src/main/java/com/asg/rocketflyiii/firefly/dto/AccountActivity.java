@@ -1,5 +1,6 @@
 package com.asg.rocketflyiii.firefly.dto;
 
+import com.asg.rocketflyiii.access.WebAccess.Scope;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.YearMonth;
@@ -28,6 +29,7 @@ public record AccountActivity(
             BigDecimal balance) {}
 
     public static AccountActivity from(
+            Scope scope,
             long id, YearMonth month, JsonNode account, List<JsonNode> groups) {
         String currency = account.path("currency_code").asText("");
         String owner = Long.toString(id);
@@ -74,10 +76,10 @@ public record AccountActivity(
                             date.toString(),
                             text(split, "description"),
                             text(split, "type"),
-                            text(split, "source_name"),
-                            text(split, "destination_name"),
+                            scope.visibleName(split, "source", "account"),
+                            scope.visibleName(split, "destination", "account"),
                             text(split, "category_name"),
-                            text(split, "budget_name"),
+                            scope.visibleName(split, "budget", "budget"),
                             amount,
                             balance));
             balance = balance.subtract(amount);

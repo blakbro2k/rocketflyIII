@@ -1,5 +1,6 @@
 package com.asg.rocketflyiii.firefly.dto;
 
+import com.asg.rocketflyiii.access.WebAccess.Scope;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.YearMonth;
@@ -53,6 +54,7 @@ public record BudgetActivity(List<Totals> currencies, List<Entry> transactions) 
     }
 
     public static BudgetActivity from(
+            Scope scope,
             long budgetId, YearMonth month, List<JsonNode> limits, List<JsonNode> groups) {
         Map<String, Amounts> amounts = new TreeMap<>();
         List<Entry> entries = new ArrayList<>();
@@ -88,10 +90,12 @@ public record BudgetActivity(List<Totals> currencies, List<Entry> transactions) 
                                 field(split, "type"),
                                 field(split, "currency_code"),
                                 amount(split),
-                                split.path("source_name").asText(null),
-                                split.path("destination_name").asText(null),
+                                scope.visibleName(split, "source", "account"),
+                                scope.visibleName(split, "destination", "account"),
                                 split.path("category_name").asText(null),
-                                split.path("running_balance").asText(null));
+                                scope.admin() || (scope.allows("account", split.path("source_id").asText(""))
+                                        && scope.allows("account", split.path("destination_id").asText("")))
+                                        ? split.path("running_balance").asText(null) : null);
                 entries.add(entry);
                 Amounts totals = amounts.computeIfAbsent(entry.currency(), key -> new Amounts());
                 if ("withdrawal".equals(entry.type()))

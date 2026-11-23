@@ -93,6 +93,34 @@ class ProfileAccessTest {
     }
 
     @Test
+    void restrictedActivityKeepsAmountsAndHidesUngrantedResourceNames() throws Exception {
+        var scope = new WebAccess.Scope(false, Set.of(new AccessStore.Grant("account", "7")));
+        var group = json.readTree("""
+                {"attributes":{"transactions":[{"budget_id":"12","budget_name":"Private budget",
+                "date":"2026-11-01","type":"transfer","description":"Transfer","amount":"200",
+                "currency_code":"USD","source_id":"9","source_name":"Business","destination_id":"7",
+                "destination_name":"Checking","running_balance":"800"}]}}
+                """);
+        var month = YearMonth.of(2026, 11);
+        var account = json.readTree("""
+                {"currency_code":"USD","current_balance":"500","name":"Checking"}
+                """);
+        var entry = AccountActivity.from(scope, 7, month, account, List.of(group)).transactions().getFirst();
+        assertEquals("Checking", entry.destination());
+        assertNull(entry.source());
+        assertNull(entry.budget());
+        assertEquals(new java.math.BigDecimal("200"), entry.amount());
+
+        var budgetScope = new WebAccess.Scope(false, Set.of(new AccessStore.Grant("budget", "12")));
+        var budget = BudgetActivity.from(budgetScope, 12, month, List.of(), List.of(group));
+        var transfer = budget.transactions().getFirst();
+        assertNull(transfer.source());
+        assertNull(transfer.destination());
+        assertNull(transfer.runningBalance());
+        assertEquals(entry.amount(), budget.currencies().getFirst().transfers());
+    }
+
+    @Test
     void bootstrapAssignGrantRevokeAndRecover() throws Exception {
         mvc.perform(get("/")).andExpect(redirectedUrl("/setup.html"));
         mvc.perform(get("/api/budgets").servletPath("/api/budgets"))
