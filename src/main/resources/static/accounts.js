@@ -1,3 +1,4 @@
+import { money } from "./budget-chart.js";
 import { monthPicker } from "./settings.js";
 
 const refresh = document.querySelector("#refresh");
@@ -43,8 +44,11 @@ function accountGroup(key, label, accounts, collapsed) {
     link.textContent = attributes.name;
     row.insertCell().append(link);
     const amount = attributes.current_balance;
-    row.insertCell().textContent = amount == null || amount === ""
-      ? "—" : [amount, attributes.currency_code].filter(value => value != null && value !== "").join(" ");
+    const balance = row.insertCell();
+    balance.textContent = amount == null || amount === "" ? "—" : String(amount);
+    if (amount != null && amount !== "" && /^[a-z]{3}$/i.test(attributes.currency_code ?? "")) {
+      balance.textContent = money(amount, attributes.currency_code);
+    }
   }
   section.append(table);
   return section;

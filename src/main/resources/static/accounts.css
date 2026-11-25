@@ -65,6 +65,9 @@ details p { color: #515575; padding-inline: .5rem; }
   scroll-snap-align: start;
   overflow-wrap: anywhere;
 }
+@media (min-width: 52rem) {
+  #budget-list li { flex-basis: calc((100% - 2.55rem) / 4); }
+}
 #budget-list strong { display: block; margin-bottom: .6rem; }
 #budget-list span { color: #515575; font-size: .9rem; }
 #budget-navigation { margin-top: .65rem; text-align: right; }
