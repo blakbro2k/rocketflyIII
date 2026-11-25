@@ -22,7 +22,7 @@ header {
 main { width: min(90%, 62rem); margin: clamp(1.25rem, 3vw, 2.5rem) auto; }
 .heading { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
 h1, h2 { margin: 0; font-size: clamp(1.6rem, 3vw, 2.25rem); letter-spacing: -.045em; }
-button {
+button, .overview-button {
   padding: .65rem 1rem;
   border: 1px solid #7050ba;
   border-radius: .4rem;
@@ -31,7 +31,8 @@ button {
   color: inherit;
   cursor: pointer;
 }
-button:hover { background: #f2edff; }
+.overview-button { display: inline-block; text-decoration: none; margin-bottom: .65rem; }
+button:hover, .overview-button:hover { background: #f2edff; }
 summary:focus-visible, button:focus-visible { outline: 3px solid #6541bb; outline-offset: 3px; }
 #status, #budget-status, #subscription-status { margin: .65rem 0 1.8rem; color: #515575; }
 table { width: 100%; border-collapse: collapse; background: white; }
