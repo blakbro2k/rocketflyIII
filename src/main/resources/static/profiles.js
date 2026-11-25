@@ -17,19 +17,29 @@ async function load() {
   for (const user of users) {
     const row = document.createElement("form");
     const label = document.createElement("label");
-    label.textContent = user.username;
+    const name = document.createElement("strong");
+    name.textContent = user.username;
+    label.textContent = "Role";
     const select = document.createElement("select");
     choices(select);
     select.value = user.roleId;
     label.append(select);
     const save = document.createElement("button");
-    save.textContent = "Assign role";
-    row.append(label, save);
+    save.textContent = "Save changes";
+    const statusLabel = document.createElement("label");
+    statusLabel.textContent = "Status";
+    const status = document.createElement("select");
+    status.append(option("active", "Active"), option("inactive", "Inactive"));
+    status.value = user.active ? "active" : "inactive";
+    statusLabel.append(status);
+    row.setAttribute("aria-label", "Edit " + user.username);
+    row.append(name, label, statusLabel, save);
     row.onsubmit = event => {
       event.preventDefault();
       perform(async () => {
-        await api("/api/admin/profiles/" + encodeURIComponent(user.username) + "/role", "PUT", {roleId: Number(select.value)});
+        await api("/api/admin/profiles/" + encodeURIComponent(user.username), "PUT", {roleId: Number(select.value), active: status.value === "active"});
         await load();
+        document.querySelector("#feedback").textContent = "Saved changes for " + user.username + ".";
       });
     };
     list.append(row);
@@ -43,6 +53,7 @@ add.onsubmit = event => {
     await api("/api/admin/profiles", "POST", {username: fields.username.value, password: fields.password.value, roleId: Number(fields.role.value)});
     add.reset();
     await load();
+    document.querySelector("#feedback").textContent = "Profile created.";
   });
 };
 perform(load);

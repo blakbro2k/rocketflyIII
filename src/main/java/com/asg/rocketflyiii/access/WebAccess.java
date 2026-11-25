@@ -54,7 +54,7 @@ public class WebAccess implements WebMvcConfigurer, HandlerInterceptor {
                                                                         ? "/setup.html"
                                                                         : "/login"));
                                         }))
-                .formLogin(f -> f.defaultSuccessUrl("/", true).permitAll())
+                .formLogin(f -> f.loginPage("/login").defaultSuccessUrl("/", true).permitAll())
                 .logout(l -> l.logoutSuccessUrl("/login"))
                 .build();
     }
@@ -62,6 +62,11 @@ public class WebAccess implements WebMvcConfigurer, HandlerInterceptor {
     public record Scope(boolean admin, Set<AccessStore.Grant> grants) {
         public boolean allows(String kind, String id) {
             return admin || grants.contains(new AccessStore.Grant(kind, id));
+        }
+
+        public String visibleName(JsonNode split, String field, String kind) {
+            if (!allows(kind, split.path(field + "_id").asText(""))) return null;
+            return split.path(field + "_name").asText(null);
         }
 
         public List<JsonNode> visible(String kind, List<JsonNode> items) {
@@ -89,7 +94,7 @@ public class WebAccess implements WebMvcConfigurer, HandlerInterceptor {
             return false;
         }
         var profile = store.profile(auth.getName());
-        if (auth.getAuthorities().stream()
+        if (!profile.active() || auth.getAuthorities().stream()
                 .noneMatch(a -> a.getAuthority().equals("version:" + profile.version()))) {
             req.getSession().invalidate();
             res.sendError(401);

@@ -93,6 +93,34 @@ class ProfileAccessTest {
     }
 
     @Test
+    void restrictedActivityKeepsAmountsAndHidesUngrantedResourceNames() throws Exception {
+        var scope = new WebAccess.Scope(false, Set.of(new AccessStore.Grant("account", "7")));
+        var group = json.readTree("""
+                {"attributes":{"transactions":[{"budget_id":"12","budget_name":"Private budget",
+                "date":"2026-11-01","type":"transfer","description":"Transfer","amount":"200",
+                "currency_code":"USD","source_id":"9","source_name":"Business","destination_id":"7",
+                "destination_name":"Checking","running_balance":"800"}]}}
+                """);
+        var month = YearMonth.of(2026, 11);
+        var account = json.readTree("""
+                {"currency_code":"USD","current_balance":"500","name":"Checking"}
+                """);
+        var entry = AccountActivity.from(scope, 7, month, account, List.of(group)).transactions().getFirst();
+        assertEquals("Checking", entry.destination());
+        assertNull(entry.source());
+        assertNull(entry.budget());
+        assertEquals(new java.math.BigDecimal("200"), entry.amount());
+
+        var budgetScope = new WebAccess.Scope(false, Set.of(new AccessStore.Grant("budget", "12")));
+        var budget = BudgetActivity.from(budgetScope, 12, month, List.of(), List.of(group));
+        var transfer = budget.transactions().getFirst();
+        assertNull(transfer.source());
+        assertNull(transfer.destination());
+        assertNull(transfer.runningBalance());
+        assertEquals(entry.amount(), budget.currencies().getFirst().transfers());
+    }
+
+    @Test
     void bootstrapAssignGrantRevokeAndRecover() throws Exception {
         mvc.perform(get("/")).andExpect(redirectedUrl("/setup.html"));
         mvc.perform(get("/api/budgets").servletPath("/api/budgets"))
@@ -101,6 +129,9 @@ class ProfileAccessTest {
         claim("wrong", PASSWORD, 403);
         claim("first-token", PASSWORD, 200);
         claim("first-token", PASSWORD, 403);
+        mvc.perform(get("/login").servletPath("/login"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("name=\"password\"")));
         var admin = login("owner", PASSWORD);
         mvc.perform(get("/api/admin/profiles").session(admin)).andExpect(status().isOk());
         var familyInput =
@@ -178,6 +209,24 @@ class ProfileAccessTest {
                 .andExpect(status().isConflict());
         mvc.perform(delete("/api/admin/roles/" + role.id()).session(admin))
                 .andExpect(status().isForbidden());
+        String path = "/api/admin/profiles/family";
+        String inactive = json.writeValueAsString(Map.of("roleId", role.id(), "active", false));
+        mvc.perform(withToken(put(path).contentType("application/json").content(inactive), family))
+                .andExpect(status().isForbidden());
+        mvc.perform(withToken(put(path).contentType("application/json").content(inactive), admin))
+                .andExpect(status().isOk());
+        mvc.perform(get("/api/me").session(family)).andExpect(status().isUnauthorized());
+        mvc.perform(withToken(post("/login").param("username", "family").param("password", PASSWORD),
+                        new MockHttpSession()))
+                .andExpect(redirectedUrl("/login?error"));
+        mvc.perform(withToken(put("/api/admin/profiles/owner").contentType("application/json")
+                        .content(inactive), admin))
+                .andExpect(status().isBadRequest());
+        String active = json.writeValueAsString(Map.of("roleId", role.id(), "active", true));
+        mvc.perform(withToken(put(path).contentType("application/json").content(active), admin))
+                .andExpect(status().isOk());
+        mvc.perform(get("/api/me").session(login("family", PASSWORD)))
+                .andExpect(jsonPath("$.active").value(true));
         Files.writeString(directory.resolve("setup-token"), "recovery-token");
         claim("recovery-token", "replacement-password", 200);
         mvc.perform(get("/api/admin/profiles").session(admin)).andExpect(status().isUnauthorized());

@@ -16,3 +16,4 @@ CREATE TABLE IF NOT EXISTS rf_grant (
     resource_id VARCHAR(32) NOT NULL,
     PRIMARY KEY (role_id, kind, resource_id)
 );
+ALTER TABLE rf_profile ADD COLUMN IF NOT EXISTS active BOOLEAN DEFAULT TRUE NOT NULL;

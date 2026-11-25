@@ -36,8 +36,9 @@ public class AccountController {
 
     @GetMapping("/api/accounts/{id}/activity")
     public AccountActivity activity(
+            @RequestAttribute Scope scope,
             @PathVariable long id,
             @RequestParam @DateTimeFormat(pattern = "uuuu-MM") YearMonth month) {
-        return accounts.activity(id, month);
+        return accounts.activity(id, month, scope);
     }
 }

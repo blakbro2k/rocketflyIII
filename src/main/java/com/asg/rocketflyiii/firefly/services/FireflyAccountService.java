@@ -1,5 +1,6 @@
 package com.asg.rocketflyiii.firefly.services;
 
+import com.asg.rocketflyiii.access.WebAccess.Scope;
 import com.asg.rocketflyiii.firefly.api.FireflyClient;
 import com.asg.rocketflyiii.firefly.dto.AccountActivity;
 import com.asg.rocketflyiii.firefly.dto.FireflyPage;
@@ -34,9 +35,10 @@ public class FireflyAccountService {
         return FireflyPage.collect(page -> client.getAccountsPage(type, page));
     }
 
-    public AccountActivity activity(long id, YearMonth month) {
+    public AccountActivity activity(long id, YearMonth month, Scope scope) {
         var account = client.getDatedAccount(id, month.atEndOfMonth());
         return AccountActivity.from(
+                scope,
                 id,
                 month,
                 account,

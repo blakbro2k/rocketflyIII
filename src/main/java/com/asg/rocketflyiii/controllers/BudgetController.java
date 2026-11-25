@@ -29,9 +29,11 @@ public class BudgetController {
 
     @GetMapping("/api/budgets/{id}/activity")
     public BudgetActivity getActivity(
+            @RequestAttribute Scope scope,
             @PathVariable long id,
             @RequestParam @DateTimeFormat(pattern = "uuuu-MM") YearMonth month) {
         return BudgetActivity.from(
+                scope,
                 id,
                 month,
                 FireflyPage.collect(page -> client.getBudgetLimits(id, month, page)),

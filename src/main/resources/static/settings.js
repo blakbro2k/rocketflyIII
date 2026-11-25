@@ -29,10 +29,10 @@ api("/api/me").then(me => {
     const roles = document.createElement("a");
     roles.href = "/roles.html";
     roles.textContent = "Roles";
-    links.append(" · ", roles);
+    links.append(roles);
   }
   const logout = document.createElement("a");
   logout.href = "/logout";
   logout.textContent = "Sign out";
-  links.append(" · ", logout);
+  links.append(logout);
 }).catch(() => {});
