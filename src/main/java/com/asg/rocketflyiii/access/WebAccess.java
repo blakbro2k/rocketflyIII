@@ -34,6 +34,7 @@ public class WebAccess implements WebMvcConfigurer, HandlerInterceptor {
                                                 "/setup.html",
                                                 "/setup.js",
                                                 "/accounts.css",
+                                                "/rocket-mark.svg",
                                                 "/access-ui.js",
                                                 "/api/csrf",
                                                 "/api/setup",
