@@ -46,7 +46,10 @@ async function loadBudgets() {
       link.append(name);
       const chart = document.createElement("div");
       chart.textContent = "Loading chart…";
-      card.append(link, chart);
+      const status = document.createElement("small");
+      status.className = attributes.active ? "budget-active" : "budget-inactive";
+      status.textContent = attributes.active ? "Active" : "Inactive";
+      card.append(link, status, chart);
       loadActivity(id, month).then(activity => {
         renderChart(chart, activity, { compact: true });
       }).catch(() => { chart.textContent = "Chart unavailable."; });

@@ -16,7 +16,7 @@ public class LoginController {
                 <html lang="en"><head><meta charset="utf-8">
                 <meta name="viewport" content="width=device-width, initial-scale=1">
                 <title>Sign in · RocketFlyIII</title><link rel="stylesheet" href="accounts.css">
-                </head><body><header>RocketFlyIII</header>
+                </head><body><header><span class="brand"><img src="rocket-mark.svg" alt="">RocketFlyIII</span></header>
                 <main class="panel access-page"><h1>Sign in</h1>%s
                 <form method="post" action="login">
                 <input type="hidden" name="%s" value="%s">
