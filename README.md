@@ -2,6 +2,10 @@
 
 Rocket Fly III is a mobile-friendly, read-only companion to [Firefly III](https://www.firefly-iii.org/). It aims for the ease of use of Rocket Money while keeping Firefly III authoritative for financial records, accounts, transactions, categories, and budgets.
 
+## Local installation
+
+Download the launcher ZIP from the [latest packaged release](https://github.com/blakbro2k/rocketflyIII/releases/latest). Follow the [local setup and upgrade instructions](distribution/README.md).
+
 ## Product principles
 
 - **Firefly III is the system of record.** Rocket Fly III never writes financial changes back to Firefly III.
