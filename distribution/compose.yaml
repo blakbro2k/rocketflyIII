@@ -1,0 +1,16 @@
+name: rocketflyiii
+services:
+  rocketflyiii:
+    image: ghcr.io/blakbro2k/rocketflyiii:${ROCKETFLY_TAG:-stable}
+    restart: unless-stopped
+    environment:
+      FIREFLY_BASE_URL: ${FIREFLY_BASE_URL:?Run the launcher first}
+      FIREFLY_API_TOKEN: ${FIREFLY_API_TOKEN:?Run the launcher first}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - profiles:/data
+    ports:
+      - "127.0.0.1:${ROCKETFLY_PORT:-8080}:8080"
+volumes:
+  profiles:
