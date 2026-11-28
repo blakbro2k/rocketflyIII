@@ -4,6 +4,8 @@ from getpass import getpass
 import json
 import os
 from pathlib import Path
+import socket
+import tempfile
 import subprocess
 import sys
 import time
@@ -13,6 +15,24 @@ from urllib.request import urlopen
 
 HOME_DIR = Path(__file__).resolve().parent
 CONFIG = HOME_DIR / "connection.json"
+
+
+def port_number(value):
+    port = int(value)
+    if not 1 <= port <= 65535:
+        raise ValueError("Choose a port between 1 and 65535.")
+    return str(port)
+
+
+def save_settings(settings):
+    with tempfile.NamedTemporaryFile(mode="w", dir=CONFIG.parent, delete=False) as stream:
+        temporary = Path(stream.name)
+        try:
+            json.dump(settings, stream)
+            stream.close()
+            os.replace(temporary, CONFIG)
+        finally:
+            temporary.unlink(missing_ok=True)
 
 
 def configure():
@@ -27,9 +47,7 @@ def configure():
     token = getpass("Firefly III personal access token (hidden): ").strip()
     if not token:
         raise ValueError("A Firefly III token is required.")
-    port = int(input("Local RocketFlyIII port [8080]: ").strip() or "8080")
-    if not 1 <= port <= 65535:
-        raise ValueError("Choose a port between 1 and 65535.")
+    port = port_number(input("Local RocketFlyIII port [8080]: ").strip() or "8080")
     settings = {"FIREFLY_BASE_URL": url, "FIREFLY_API_TOKEN": token, "ROCKETFLY_PORT": str(port)}
     with os.fdopen(os.open(CONFIG, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600), "w") as stream:
         json.dump(settings, stream)
@@ -39,16 +57,31 @@ def configure():
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--setup", action="store_true", help="Issue a new setup or admin recovery token")
+    parser.add_argument("--port", type=port_number, metavar="PORT",
+                        help="Change the local port of an existing installation")
     args = parser.parse_args()
+    if args.port and not CONFIG.exists():
+        parser.error("Run the launcher once to configure the Firefly connection first.")
     subprocess.run(["docker", "compose", "version"], check=True)
     first = not CONFIG.exists()
     settings = configure() if first else json.loads(CONFIG.read_text())
+    changed = args.port is not None and args.port != str(settings["ROCKETFLY_PORT"])
+    if changed:
+        with socket.socket() as probe:
+            try:
+                probe.bind(("127.0.0.1", int(args.port)))
+            except OSError as error:
+                raise RuntimeError(f"Local port {args.port} is unavailable. Choose another port.") from error
+        settings["ROCKETFLY_PORT"] = args.port
     env = os.environ.copy()
     for key in ("FIREFLY_BASE_URL", "FIREFLY_API_TOKEN", "ROCKETFLY_PORT"):
         env[key] = settings[key]
     compose = ["docker", "compose", "-f", str(HOME_DIR / "compose.yaml")]
-    subprocess.run(compose + ["pull"], env=env, check=True)
+    if not args.port:
+        subprocess.run(compose + ["pull"], env=env, check=True)
     subprocess.run(compose + ["up", "-d"], env=env, check=True)
+    if changed:
+        save_settings(settings)
     base = "http://127.0.0.1:" + env["ROCKETFLY_PORT"]
     for _ in range(60):
         try:
