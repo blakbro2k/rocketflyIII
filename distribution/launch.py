@@ -36,6 +36,22 @@ def configure():
     return settings
 
 
+def wait_for_startup(base):
+    deadline = time.monotonic() + 60
+    while True:
+        try:
+            with urlopen(base + "/setup.html", timeout=2):
+                return
+        except (ConnectionResetError, URLError, TimeoutError) as error:
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                raise RuntimeError(
+                    f"RocketFlyIII did not become ready at {base}. Last error: {error}. "
+                    "Check docker logs rocketflyiii-rocketflyiii-1."
+                ) from error
+            time.sleep(min(1, remaining))
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--setup", action="store_true", help="Issue a new setup or admin recovery token")
@@ -50,14 +66,7 @@ def main():
     subprocess.run(compose + ["pull"], env=env, check=True)
     subprocess.run(compose + ["up", "-d"], env=env, check=True)
     base = "http://127.0.0.1:" + env["ROCKETFLY_PORT"]
-    for _ in range(60):
-        try:
-            with urlopen(base + "/setup.html", timeout=2):
-                break
-        except (URLError, TimeoutError):
-            time.sleep(1)
-    else:
-        raise RuntimeError("Startup timed out. Check docker logs for the RocketFlyIII container.")
+    wait_for_startup(base)
     if first or args.setup:
         subprocess.run(compose + ["exec", "-T", "rocketflyiii", "java", "/app/SetupToken.java"],
                        env=env, check=True)

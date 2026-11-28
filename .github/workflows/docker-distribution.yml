@@ -24,9 +24,10 @@ jobs:
           ROCKETFLY_TAG: smoke
         working-directory: distribution
         run: |
+          python3 -m unittest discover -s . -p test_launch.py -v
           docker build -t ghcr.io/blakbro2k/rocketflyiii:smoke ..
           docker compose up -d --pull never
-          curl --fail --retry 30 --retry-all-errors --retry-delay 2 http://127.0.0.1:8080/setup.html >/dev/null
+          python3 -c "from launch import wait_for_startup; wait_for_startup('http://127.0.0.1:8080')"
           docker compose exec -T rocketflyiii java /app/SetupToken.java >/dev/null
           docker compose down -v
 
