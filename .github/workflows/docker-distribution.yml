@@ -1,0 +1,61 @@
+name: Docker distribution
+on:
+  pull_request:
+    branches: [dev, main]
+    paths:
+      - Dockerfile
+      - distribution/**
+      - .github/workflows/docker-distribution.yml
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Build and exercise local installation
+        env:
+          FIREFLY_BASE_URL: http://host.docker.internal:8081
+          FIREFLY_API_TOKEN: smoke-test
+          ROCKETFLY_TAG: smoke
+        working-directory: distribution
+        run: |
+          docker build -t ghcr.io/blakbro2k/rocketflyiii:smoke ..
+          docker compose up -d --pull never
+          curl --fail --retry 30 --retry-all-errors --retry-delay 2 http://127.0.0.1:8080/setup.html >/dev/null
+          docker compose exec -T rocketflyiii java /app/SetupToken.java >/dev/null
+          docker compose down -v
+
+  publish:
+    needs: smoke
+    if: github.event_name == 'release' && !github.event.release.prerelease
+    runs-on: ubuntu-latest
+    concurrency: rocketflyiii-publish
+    permissions:
+      packages: write
+      contents: write
+    env:
+      TAG: ${{ github.event.release.tag_name }}
+      IMAGE: ghcr.io/blakbro2k/rocketflyiii
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v6
+      - name: Validate release tag
+        run: '[[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]'
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
+      - name: Publish versioned image and launcher
+        run: |
+          echo "$GH_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+          docker buildx build --platform linux/amd64,linux/arm64 --push \
+            --label "org.opencontainers.image.source=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY" \
+            -t "$IMAGE:$TAG" .
+          (cd distribution && zip ../rocketflyiii-local.zip README.md launch.py compose.yaml)
+          gh release upload "$TAG" rocketflyiii-local.zip --clobber
+          if [[ "$(gh api "repos/$GITHUB_REPOSITORY/releases/latest" --jq .tag_name)" == "$TAG" ]]; then
+            docker buildx imagetools create -t "$IMAGE:stable" "$IMAGE:$TAG"
+          fi

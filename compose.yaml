@@ -1,0 +1,12 @@
+services:
+  rocketflyiii:
+    build: .
+    environment:
+      FIREFLY_BASE_URL: ${FIREFLY_BASE_URL:?Set FIREFLY_BASE_URL}
+      FIREFLY_API_TOKEN: ${FIREFLY_API_TOKEN:?Set FIREFLY_API_TOKEN}
+    volumes:
+      - profiles:/data
+    ports:
+      - "127.0.0.1:8080:8080"
+volumes:
+  profiles:
